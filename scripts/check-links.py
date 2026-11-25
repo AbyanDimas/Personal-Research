@@ -45,6 +45,11 @@ for md_file in ROOT_DIR.rglob("*.md"):
     for match in link_pattern.finditer(content):
         text, url = match.group(1), match.group(2).strip()
 
+        # Unwrap Jekyll Liquid relative_url filter if present
+        liquid_match = re.match(r"^\{\{\s*['\"]([^'\"]+)['\"]\s*\|\s*relative_url\s*\}\}$", url)
+        if liquid_match:
+            url = liquid_match.group(1)
+
         # Skip external web links, mailto, anchor-only links
         if url.startswith(("http://", "https://", "mailto:", "#", "javascript:")):
             continue

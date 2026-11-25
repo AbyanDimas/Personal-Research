@@ -3,6 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
+      - dev
       - pages
   pull_request:
     branches:
@@ -22,6 +23,15 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Enforce PR Source Branch (dev -> pages)
+        if: github.event_name == 'pull_request' && github.base_ref == 'pages'
+        run: |
+          if [ "${{ github.head_ref }}" != "dev" ]; then
+            echo "::error::Pull requests to 'pages' (production) must come from 'dev', got '${{ github.head_ref }}'"
+            exit 1
+          fi
+          echo "Source branch 'dev' verified."
 
       - name: Validate PR Title (Conventional Commits)
         if: github.event_name == 'pull_request'

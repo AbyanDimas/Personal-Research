@@ -25,7 +25,7 @@ labs/
 └── README.md              # Quickstart guide for provisioning laboratory nodes
 ```
 
-For Linux lab scripts and usage examples, see [Linux Lab Scripts](/labs/linux/).
+For Linux lab scripts and usage examples, see [Linux Lab Scripts]({{ '/labs/linux/' | relative_url }}).
 
 ---
 
@@ -61,11 +61,11 @@ cp /path/to/Opentack-Research/labs/devstack/local.conf ./local.conf
 
 ## Kolla-Ansible Assets
 
-For multi-node containerized deployments, refer to the operational documentation in [Kolla-Ansible Multi-Node Deployment](/docs/operations/kolla-ansible/).
+For multi-node containerized deployments, refer to the operational documentation in [Kolla-Ansible Multi-Node Deployment]({{ '/docs/operations/kolla-ansible/' | relative_url }}).
 
 ---
 
 <div class="page-nav-box">
-  <a href="/docs/operations/kolla-ansible/" class="page-nav-btn">← Kolla-Ansible Guide</a>
-  <a href="/" class="page-nav-btn">Back to Home →</a>
+  <a href="{{ '/docs/operations/kolla-ansible/' | relative_url }}" class="page-nav-btn">← Kolla-Ansible Guide</a>
+  <a href="{{ '/' | relative_url }}" class="page-nav-btn">Back to Home →</a>
 </div>
