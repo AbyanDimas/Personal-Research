@@ -6,8 +6,6 @@ permalink: /docs/linux/permissions-and-links/
 
 # Object Permissions and Extending Usability
 
-Catatan materi dari bootstrap-it.com/linux-admin
-
 ## Numeric Notation
 
 - Read: r = 4

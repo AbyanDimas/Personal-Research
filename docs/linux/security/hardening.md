@@ -6,8 +6,6 @@ permalink: /docs/linux/hardening/
 
 # Hardening Your Server
 
-Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC2
-
 ## Patching Sistem
 
 Update daftar paket dan upgrade sistem di Debian/Ubuntu

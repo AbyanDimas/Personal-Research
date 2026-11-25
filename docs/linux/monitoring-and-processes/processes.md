@@ -6,8 +6,6 @@ permalink: /docs/linux/processes/
 
 # Managing System Processes
 
-Catatan materi dari bootstrap-it.com/linux-admin
-
 ## Inspecting Processes
 
 Cek proses yang jalan di shell saat ini

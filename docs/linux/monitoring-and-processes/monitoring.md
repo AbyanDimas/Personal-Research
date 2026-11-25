@@ -6,8 +6,6 @@ permalink: /docs/linux/monitoring/
 
 # Monitoring System
 
-Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi AWS EC2
-
 ## Kenapa Perlu Monitoring
 
 - Mengetahui kapasitas CPU, memory, disk, dan network yang sedang terpakai sebelum service down
