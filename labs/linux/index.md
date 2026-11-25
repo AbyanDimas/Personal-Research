@@ -63,3 +63,8 @@ Script read-only untuk mengecek service apa saja yang aktif saat boot, port TCP 
     apparmor module is loaded.
     42 profiles are loaded.
     40 profiles are in enforce mode.
+
+<div class="page-nav-box">
+  <a href="{{ '/docs/linux/encryption/' | relative_url }}" class="page-nav-btn">&larr; Data Encryption</a>
+  <a href="{{ '/' | relative_url }}" class="page-nav-btn">Back to Home &rarr;</a>
+</div>

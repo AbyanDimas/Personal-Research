@@ -14,19 +14,33 @@ from pathlib import Path
 # Mapping from repo path to GitHub Wiki page name
 DOCS_MAP = {
     "index.md": "Home.md",
-    "docs/overview/architecture.md": "Architecture-and-Topology.md",
-    "docs/overview/environment-setup.md": "Environment-and-Setup.md",
-    "docs/overview/devstack-lab-notes.md": "DevStack-Lab-Notes.md",
-    "docs/core-services/keystone.md": "Keystone-Identity.md",
-    "docs/core-services/nova-placement.md": "Nova-and-Placement-Compute.md",
-    "docs/core-services/neutron-ovn.md": "Neutron-and-OVN-Networking.md",
-    "docs/core-services/storage.md": "Glance-and-Cinder-Storage.md",
-    "docs/operations/troubleshooting.md": "Troubleshooting-and-Diagnostics.md",
-    "docs/operations/kolla-ansible.md": "Kolla-Ansible-Multi-Node.md",
+    "docs/linux/monitoring-and-processes/monitoring.md": "Linux-Monitoring-System.md",
+    "docs/linux/monitoring-and-processes/processes.md": "Linux-Managing-Processes.md",
+    "docs/linux/users-and-permissions/users-and-groups.md": "Linux-Users-and-Groups.md",
+    "docs/linux/users-and-permissions/permissions-and-links.md": "Linux-Permissions-and-Symlinks.md",
+    "docs/linux/security/hardening.md": "Linux-Server-Hardening.md",
+    "docs/linux/security/encryption.md": "Linux-Data-Encryption.md",
+    "labs/linux/index.md": "Linux-Lab-Scripts.md",
+    "docs/openstack/overview/architecture.md": "Architecture-and-Topology.md",
+    "docs/openstack/overview/environment-setup.md": "Environment-and-Setup.md",
+    "docs/openstack/overview/devstack-lab-notes.md": "DevStack-Lab-Notes.md",
+    "docs/openstack/core-services/keystone.md": "Keystone-Identity.md",
+    "docs/openstack/core-services/nova-placement.md": "Nova-and-Placement-Compute.md",
+    "docs/openstack/core-services/neutron-ovn.md": "Neutron-and-OVN-Networking.md",
+    "docs/openstack/core-services/storage.md": "Glance-and-Cinder-Storage.md",
+    "docs/openstack/operations/troubleshooting.md": "Troubleshooting-and-Diagnostics.md",
+    "docs/openstack/operations/kolla-ansible.md": "Kolla-Ansible-Multi-Node.md",
     "labs/index.md": "Lab-Automation-Assets.md",
 }
 
 LINK_REPLACEMENTS = {
+    r"/docs/linux/monitoring/?": "Linux-Monitoring-System",
+    r"/docs/linux/processes/?": "Linux-Managing-Processes",
+    r"/docs/linux/users-and-groups/?": "Linux-Users-and-Groups",
+    r"/docs/linux/permissions-and-links/?": "Linux-Permissions-and-Symlinks",
+    r"/docs/linux/hardening/?": "Linux-Server-Hardening",
+    r"/docs/linux/encryption/?": "Linux-Data-Encryption",
+    r"/labs/linux/?": "Linux-Lab-Scripts",
     r"/docs/overview/architecture/?": "Architecture-and-Topology",
     r"\./docs/overview/architecture/?": "Architecture-and-Topology",
     r"/docs/overview/environment-setup/?": "Environment-and-Setup",
@@ -51,27 +65,34 @@ LINK_REPLACEMENTS = {
 
 SIDEBAR_CONTENT = """[[Home]]
 
-### Overview
+### Linux
+* [[Monitoring System|Linux-Monitoring-System]]
+* [[Managing Processes|Linux-Managing-Processes]]
+* [[Users & Groups|Linux-Users-and-Groups]]
+* [[Permissions & Symlinks|Linux-Permissions-and-Symlinks]]
+* [[Server Hardening|Linux-Server-Hardening]]
+* [[Data Encryption|Linux-Data-Encryption]]
+* [[Linux Lab Scripts|Linux-Lab-Scripts]]
+
+### OpenStack - Overview
 * [[Architecture & Topology|Architecture-and-Topology]]
 * [[Environment & Setup|Environment-and-Setup]]
 * [[DevStack Lab Notes|DevStack-Lab-Notes]]
 
-### Core Services
+### OpenStack - Core Services
 * [[Keystone (Identity)|Keystone-Identity]]
 * [[Nova & Placement (Compute)|Nova-and-Placement-Compute]]
 * [[Neutron & OVN (Networking)|Neutron-and-OVN-Networking]]
 * [[Glance & Cinder (Storage)|Glance-and-Cinder-Storage]]
 
-### Operations
+### OpenStack - Operations & Labs
 * [[Troubleshooting & Diagnostics|Troubleshooting-and-Diagnostics]]
 * [[Kolla-Ansible (Multi-Node)|Kolla-Ansible-Multi-Node]]
-
-### Labs & Automation
 * [[Lab Scripts & Configs|Lab-Automation-Assets]]
 """
 
 FOOTER_CONTENT = """---
-*Synced automatically from the main repository via GitHub Actions.* [View Source on GitHub](https://github.com/AbyanDimas/Opentack-Research)
+*Synced automatically from the main repository via GitHub Actions.* [View Source on GitHub](https://github.com/AbyanDimas/Personal-Research)
 """
 
 def clean_frontmatter(content):
@@ -79,6 +100,8 @@ def clean_frontmatter(content):
     content = re.sub(r"^---\s*\n.*?\n---\s*\n", "", content, flags=re.DOTALL)
     # Strip page-nav-box div
     content = re.sub(r'<div class="page-nav-box">.*?</div>', "", content, flags=re.DOTALL)
+    # Unwrap Jekyll relative_url filter
+    content = re.sub(r"\{\{\s*['\"]([^'\"]+)['\"]\s*\|\s*relative_url\s*\}\}", r"\1", content)
     # Replace relative links with wiki page names
     for pattern, target in LINK_REPLACEMENTS.items():
         content = re.sub(r'\]\(' + pattern + r'\)', f']({target})', content)
@@ -99,7 +122,7 @@ def main():
         except Exception:
             token = ""
 
-    repo = os.environ.get("GITHUB_REPOSITORY", "AbyanDimas/Opentack-Research")
+    repo = os.environ.get("GITHUB_REPOSITORY", "AbyanDimas/Personal-Research")
 
     if not token:
         wiki_url = f"https://github.com/{repo}.wiki.git"

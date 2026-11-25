@@ -32,7 +32,7 @@ def parse_semver(tag_str):
     return int(m.group(1)), int(m.group(2)), int(m.group(3))
 
 def main():
-    repo = os.environ.get("GITHUB_REPOSITORY", "AbyanDimas/Opentack-Research")
+    repo = os.environ.get("GITHUB_REPOSITORY", "AbyanDimas/Personal-Research")
     latest_tag = get_latest_tag()
     print(f"Current latest tag: {latest_tag}")
 

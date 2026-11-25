@@ -64,3 +64,8 @@ Untuk kebutuhan enkripsi per file, misalnya sebelum menaruh file rahasia ke back
     gpg: AES256.CFB encrypted data
     gpg: encrypted with 1 passphrase
     my-db-password-123
+
+<div class="page-nav-box">
+  <a href="{{ '/docs/linux/hardening/' | relative_url }}" class="page-nav-btn">&larr; Server Hardening</a>
+  <a href="{{ '/labs/linux/' | relative_url }}" class="page-nav-btn">Next: Linux Lab Scripts &rarr;</a>
+</div>

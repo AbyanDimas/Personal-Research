@@ -37,3 +37,8 @@ Symbolic link atau symlink dipakai untuk memunculkan shortcut ke script, binary,
     total 0
     lrwxrwxrwx 1 root root         32 Nov 25 20:28 myscript.sh -> /home/ubuntu/scripts/myscript.sh
     -rw-r--r-- 1 jane secret-group  0 Nov 25 20:26 note.txt
+
+<div class="page-nav-box">
+  <a href="{{ '/docs/linux/users-and-groups/' | relative_url }}" class="page-nav-btn">&larr; Users &amp; Groups</a>
+  <a href="{{ '/docs/linux/hardening/' | relative_url }}" class="page-nav-btn">Next: Server Hardening &rarr;</a>
+</div>
