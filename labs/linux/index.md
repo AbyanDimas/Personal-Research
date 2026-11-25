@@ -12,8 +12,12 @@ Script bash latihan untuk monitoring, manajemen user/group, permission, dan hard
 
 Ambil snapshot kondisi server dalam satu kali jalan (memory, disk ext4, top 5 proses memory, listening ports, dan error journal 10 menit terakhir)
 
+Command:
+
     chmod +x labs/linux/health-check.sh
     sudo ./labs/linux/health-check.sh
+
+Output:
 
     === Memory ===
                    total        used        free      shared  buff/cache   available
@@ -37,8 +41,12 @@ Ambil snapshot kondisi server dalam satu kali jalan (memory, disk ext4, top 5 pr
 
 Otomatisasi latihan pembuatan group secret-group, user jane, usermod -a -G, chmod 750 /var/secret, dan symlink myscript.sh
 
+Command:
+
     chmod +x labs/linux/user-group-lab.sh
     sudo ./labs/linux/user-group-lab.sh
+
+Output:
 
     Setup complete:
     uid=1001(jane) gid=1001(jane) groups=1001(jane),1002(secret-group)
@@ -48,8 +56,12 @@ Otomatisasi latihan pembuatan group secret-group, user jane, usermod -a -G, chmo
 
 Pengecekan read-only untuk service yang aktif saat boot, port TCP lokal (nmap atau fallback ss), dan status AppArmor/SELinux
 
+Command:
+
     chmod +x labs/linux/hardening-audit.sh
     sudo ./labs/linux/hardening-audit.sh
+
+Output:
 
     === Enabled Boot Services ===
     UNIT FILE                              STATE           PRESET

@@ -20,6 +20,8 @@ Dipakai saat butuh double encryption (layer infrastruktur + OS) atau untuk volum
 
 Format partisi /dev/sdb1 dengan LUKS, buka mapper, buat filesystem ext4, lalu mount
 
+Command:
+
     sudo cryptsetup luksFormat /dev/sdb1
     sudo cryptsetup open /dev/sdb1 secure_data
     sudo mkfs.ext4 /dev/mapper/secure_data
@@ -28,7 +30,11 @@ Format partisi /dev/sdb1 dengan LUKS, buka mapper, buat filesystem ext4, lalu mo
 
 Cek hasil mapping block device dengan lsblk
 
+Command:
+
     lsblk /dev/sdb
+
+Output:
 
     NAME          MAJ:MIN RM SIZE RO TYPE  MOUNTPOINTS
     sdb             8:16   0  10G  0 disk
@@ -39,15 +45,25 @@ Cek hasil mapping block device dengan lsblk
 
 ## Enkripsi File dengan GPG
 
-Enkripsi simetris file memakai passphrase lalu dekripsi kembali
+Enkripsi simetris file memakai passphrase
+
+Command:
 
     gpg -c secret.txt
     ls -l secret.txt*
 
+Output:
+
     -rw-r--r-- 1 ubuntu ubuntu 24 Nov 25 20:35 secret.txt
     -rw-r--r-- 1 ubuntu ubuntu 78 Nov 25 20:35 secret.txt.gpg
 
+Dekripsi kembali file GPG ke stdout
+
+Command:
+
     gpg -d secret.txt.gpg
+
+Output:
 
     gpg: AES256.CFB encrypted data
     gpg: encrypted with 1 passphrase

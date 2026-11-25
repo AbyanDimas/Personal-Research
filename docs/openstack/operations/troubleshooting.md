@@ -6,102 +6,78 @@ permalink: /docs/operations/troubleshooting/
 
 # Troubleshooting and Diagnostic Guide
 
-Operational diagnostics and remediation procedures derived from managing a multi-node DevStack deployment under 4GB RAM constraints.
+Catatan diagnosa dan perbaikan masalah saat menjalankan DevStack multi-node dengan batas RAM 4GB per VM
 
----
+## 1. Out-Of-Memory (OOM Killer)
 
-## 1. Out-Of-Memory (OOM Killer) Remediation
+Gejala: daemon utama seperti mysqld, beam.smp (RabbitMQ), atau nova-conductor tiba-tiba mati tanpa pesan error di log service
 
-### Symptoms:
-Key daemons (`mysqld`, `beam.smp` for RabbitMQ, or `nova-conductor`) terminate unexpectedly without prior error messages in service logs.
+Cek kernel ring buffer untuk memastikan apakah OOM killer yang menembak proses
 
-### Diagnostics:
-Inspect the kernel ring buffer:
-```bash
-sudo dmesg -T | grep -i oom
-```
-If an entry such as `Out of memory: Killed process <PID> (mysqld)` appears, memory pressure has triggered the Linux OOM killer.
+Command:
 
-### Resolution Steps:
-1. **Verify Swap Space:** Ensure an 8GB–10GB swapfile is mounted with active priority.
-2. **Constrain MySQL Buffer Pool:** Restrict memory limits in `/etc/mysql/mariadb.conf.d/50-server.cnf`:
-   ```ini
-   [mysqld]
-   innodb_buffer_pool_size = 256M
-   max_connections = 100
-   ```
-3. **Decommission Telemetry:** Ensure Ceilometer, Aodh, and Heat are disabled in `local.conf`.
+    sudo dmesg -T | grep -i oom
 
----
+Output:
 
-## 2. AMQP Connection Timeouts & Heartbeat Loss
+    [Wed Nov 25 18:10:04 2026] Out of memory: Killed process 1842 (mysqld) total-vm:1920412kB, anon-rss:512400kB
 
-### Symptoms:
-Nova Compute on Node 2 reports communication failure to the controller:  
-`AMQP server on 192.168.101.142:5672 is unreachable` or `Heartbeat timeout on AMQP connection`.
+Langkah perbaikan
+- Pastikan swapfile 8GB sampai 10GB sudah terpasang dan aktif
+- Batasi ukuran buffer pool di /etc/mysql/mariadb.conf.d/50-server.cnf dan pastikan service telemetry (Ceilometer, Aodh, Heat) dimatikan di local.conf
 
-### Resolution Steps:
-1. Check port 5672 listener status on Node 1:
-   ```bash
-   sudo ss -tulpn | grep 5672
-   sudo rabbitmqctl status
-   ```
-2. Verify rabbitmq users and permissions:
-   ```bash
-   sudo rabbitmqctl list_users
-   sudo rabbitmqctl list_permissions -p /
-   ```
-3. Extend heartbeat thresholds in `/etc/nova/nova.conf`:
-   ```ini
-   [oslo_messaging_rabbit]
-   heartbeat_timeout_threshold = 60
-   heartbeat_rate = 2
-   ```
+    [mysqld]
+    innodb_buffer_pool_size = 256M
+    max_connections = 100
 
----
+## 2. Timeout Koneksi AMQP dan Heartbeat Loss
 
-## 3. DHCP and Metadata Resolution Failures in OVN
+Gejala: nova-compute di Node 2 melaporkan AMQP server on 192.168.101.142:5672 is unreachable atau Heartbeat timeout on AMQP connection
 
-### Symptoms:
-New virtual machine instances enter the `ACTIVE` state but fail to acquire an IP address via cloud-init.
+Cek port 5672, status RabbitMQ, dan daftar user/permission di Node 1
 
-### Diagnostics and Remediation:
-1. Inspect logical flows and OVSDB status:
-   ```bash
-   sudo ovn-nbctl show
-   sudo ovn-sbctl show
-   ```
-2. Execute a database resynchronization:
-   ```bash
-   neutron-ovn-db-sync-util \
-     --config-file /etc/neutron/neutron.conf \
-     --config-file /etc/neutron/plugins/ml2/ml2_conf.ini
-   ```
-3. Verify the Southbound DB remote target on Node 2:
-   ```bash
-   sudo ovs-vsctl get open . external_ids:ovn-remote
-   # Expected output: tcp:192.168.101.142:6642
-   ```
+    sudo ss -tulpn | grep 5672
+    sudo rabbitmqctl status
+    sudo rabbitmqctl list_users
+    sudo rabbitmqctl list_permissions -p /
 
----
+Perpanjang batas heartbeat di /etc/nova/nova.conf jika VM sering mengalami CPU steal atau swap delay
 
-## 4. Systemd Service Inspection for DevStack
+    [oslo_messaging_rabbit]
+    heartbeat_timeout_threshold = 60
+    heartbeat_rate = 2
 
-In modern DevStack environments, daemons run as user units under the `stack` account:
+## 3. Gagal DHCP dan Metadata di OVN
 
-```bash
-# List all active OpenStack systemd units
-systemctl --user list-units "devstack@*"
+Gejala: instance berstatus ACTIVE tapi gagal mendapat IP dari cloud-init
 
-# Stream logs for a specific service
-journalctl --user -u devstack@n-cpu.service -f --no-tail
-journalctl --user -u devstack@q-svc.service -f --no-tail
+Cek logical flow di Northbound/Southbound DB, lakukan resync, lalu cek target Southbound DB di Node 2
 
-# Restart an individual daemon
-systemctl --user restart devstack@n-cpu.service
-```
+    sudo ovn-nbctl show
+    sudo ovn-sbctl show
 
----
+    neutron-ovn-db-sync-util \
+      --config-file /etc/neutron/neutron.conf \
+      --config-file /etc/neutron/plugins/ml2/ml2_conf.ini
+
+Cek target Southbound DB di Node 2
+
+Command:
+
+    sudo ovs-vsctl get open . external_ids:ovn-remote
+
+Output:
+
+    "tcp:192.168.101.142:6642"
+
+## 4. Pengecekan Service systemd di DevStack
+
+Di DevStack modern, seluruh daemon berjalan sebagai systemd user unit di bawah akun stack
+
+    systemctl --user list-units "devstack@*"
+    journalctl --user -u devstack@n-cpu.service -f --no-tail
+    journalctl --user -u devstack@q-svc.service -f --no-tail
+    systemctl --user restart devstack@n-cpu.service
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/docs/core-services/storage/' | relative_url }}">&larr; Glance & Cinder</a>

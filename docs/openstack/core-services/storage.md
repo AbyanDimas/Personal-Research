@@ -6,43 +6,36 @@ permalink: /docs/core-services/storage/
 
 # Storage Services: Glance & Cinder
 
-OpenStack splits persistent storage into two foundational services: **Glance** for virtual machine operating system templates (*disk images*), and **Cinder** for attachable block volumes (*persistent disks*).
+OpenStack membagi storage menjadi dua service utama: Glance untuk katalog OS image VM, dan Cinder untuk block volume persisten yang bisa di-attach ke instance
 
----
+## 1. Glance: Image Registry
 
-## 1. Glance: Image Registry Architecture
+Glance menyimpan OS image, template cloud-init, dan ISO installer beserta metadatanya
 
-Glance acts as a registry and metadata catalog for raw OS images, cloud-init templates, and ISO installers.
+Perbandingan format image RAW vs QCOW2
 
-### Image Format Comparison: RAW vs. QCOW2
-
-| Metric | QCOW2 | RAW |
+| Aspek | QCOW2 | RAW |
 |---|---|---|
-| **Storage Efficiency** | Sparse and compressed; minimizes initial disk storage requirements. | Allocates full disk geometry immediately; larger footprint on disk. |
-| **First Boot Latency** | Higher; Nova must unpack or generate an overlay during initialization. | **Lowest**; instances can clone directly via sparse copying. |
-| **I/O Throughput** | Slight translation overhead during dynamic block expansion. | **Native performance**; near-zero virtualization penalty. |
-| **Ceph RBD Suitability** | Non-optimal; must be converted to RAW before fast cloning. | **Required** for Ceph copy-on-write instantaneous provisioning. |
+| Efisiensi Storage | Sparse dan terkompresi, hemat ruang disk awal | Alokasi penuh sesuai ukuran virtual disk |
+| Kecepatan Boot Awal | Lebih lambat karena Nova harus unpack atau buat overlay | Paling cepat karena langsung sparse clone |
+| Performa I/O | Ada sedikit overhead translasi saat blok bertambah | Performa native mendekati disk fisik |
+| Kecocokan Ceph RBD | Kurang optimal, perlu konversi ke RAW untuk fast clone | Wajib untuk copy-on-write instan di Ceph |
 
-### CLI Image Upload:
-```bash
-# Upload a lightweight CirrOS test image
-openstack image create "cirros-0.6.2" \
-  --file cirros-0.6.2-x86_64-disk.img \
-  --disk-format qcow2 \
-  --container-format bare \
-  --public
-```
+Upload image CirrOS ringan untuk tes boot instance
 
----
+    openstack image create "cirros-0.6.2" \
+      --file cirros-0.6.2-x86_64-disk.img \
+      --disk-format qcow2 \
+      --container-format bare \
+      --public
 
 ## 2. Cinder: Persistent Block Storage
 
-Ephemeral disks provisioned via Nova are discarded upon instance deletion. Cinder manages lifecycle and attachment for block volumes that persist independently.
+Disk ephemeral bawaan Nova akan hilang saat instance dihapus, sedangkan volume Cinder tetap persisten secara terpisah
 
-### Component Architecture:
-1. **`cinder-api`:** Authenticates and routes volume management calls from users and Nova.
-2. **`cinder-scheduler`:** Evaluates backend pools against requested size, type, IOPS capabilities, and availability zones.
-3. **`cinder-volume`:** Interacts with physical storage backends via driver modules (Ceph RBD, LVM/iSCSI, NFS, SAN arrays).
+- cinder-api: memvalidasi dan meneruskan request manajemen volume dari user dan Nova
+- cinder-scheduler: memilih backend storage sesuai ukuran, tipe volume, IOPS, dan availability zone
+- cinder-volume: berkomunikasi langsung dengan driver storage fisik (Ceph RBD, LVM/iSCSI, NFS, atau SAN)
 
 ```mermaid
 flowchart LR
@@ -53,23 +46,26 @@ flowchart LR
     StorageBackend -.->|iSCSI Block Session| NovaCompute
 ```
 
----
+## 3. Implementasi LVM Loopback di Homelab
 
-## 3. Homelab LVM Loopback Implementation
+Di lab DevStack terbatas, Cinder memakai loopback file yang dijadikan volume group LVM bernama stack-volumes-default
 
-In constrained DevStack homelab environments, Cinder storage is backed by a loopback image configured as a Linux Logical Volume Manager (LVM) volume group (`stack-volumes-default`):
+Cek pool LVM aktif lalu buat dan attach volume tes berukuran 5 GB
 
-```bash
-# Inspect active LVM storage pools
-sudo vgs
-sudo lvs
+Command:
 
-# Create and attach a persistent test volume
-openstack volume create --size 5 test-volume-01
-openstack server add volume my-instance test-volume-01
-```
+    sudo vgs
+    sudo lvs
 
----
+Output:
+
+    VG                    #PV #LV #SN Attr   VSize  VFree
+    stack-volumes-default   1   0   0 wz--n- 24.00g 24.00g
+
+Command:
+
+    openstack volume create --size 5 test-volume-01
+    openstack server add volume my-instance test-volume-01
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/docs/core-services/neutron-ovn/' | relative_url }}">&larr; Neutron & OVN</a>

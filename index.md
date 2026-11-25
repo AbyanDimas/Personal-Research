@@ -5,7 +5,7 @@ title: Personal Research Journal
 
 # Personal Research Journal
 
-Just a place for my personal study notes, commands, and random technical experiments
+Personal study notes, command references, and homelab experiments
 
 ## Linux
 

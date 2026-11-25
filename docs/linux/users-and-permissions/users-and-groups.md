@@ -17,50 +17,90 @@ Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC
 
 ## Account Data dan Group Files
 
-Cek daftar user di /etc/passwd (bisa dibaca semua user) dan hash password di /etc/shadow (khusus root/shadow)
+Cek daftar user di /etc/passwd (bisa dibaca semua user)
+
+Command:
 
     tail -n 3 /etc/passwd
+
+Output:
 
     systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
     ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash
     jane:x:1001:1001::/home/jane:/bin/bash
 
+Cek hash password di /etc/shadow (khusus root/shadow)
+
+Command:
+
     sudo tail -n 2 /etc/shadow
+
+Output:
 
     ubuntu:$y$j9T$abc123.../:19850:0:99999:7:::
     jane:$y$j9T$xyz789.../:20052:0:99999:7:::
 
-Cek daftar group di /etc/group dan file template default di /etc/skel
+Cek daftar group di /etc/group
+
+Command:
 
     tail -n 3 /etc/group
+
+Output:
 
     ubuntu:x:1000:
     jane:x:1001:
     secret-group:x:1002:jane
 
+Cek file template default di /etc/skel
+
+Command:
+
     ls -a /etc/skel
+
+Output:
 
     .  ..  .bash_logout  .bashrc  .profile
 
 ## Account Activity Data
 
-Cek UID, GID, dan group milik user ubuntu, lalu cek sesi login aktif dan riwayat login
+Cek UID, GID, dan group milik user ubuntu
+
+Command:
 
     id ubuntu
 
+Output:
+
     uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),27(sudo)
+
+Cek sesi login aktif dengan who dan w
+
+Command:
 
     who
 
+Output:
+
     ubuntu   pts/0        2026-11-25 20:10 (10.0.1.5)
 
+Command:
+
     w
+
+Output:
 
      20:22:14 up 4 days,  3:29,  1 user,  load average: 0.08, 0.10, 0.09
     USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
     ubuntu   pts/0    10.0.1.5         20:10    0.00s  0.04s  0.00s w
 
+Cek riwayat login terakhir dengan last
+
+Command:
+
     last -n 3
+
+Output:
 
     ubuntu   pts/0        10.0.1.5         Wed Nov 25 20:10   still logged in
     ubuntu   pts/0        10.0.1.5         Tue Nov 24 09:14 - 11:42  (02:28)
@@ -70,14 +110,17 @@ Cek UID, GID, dan group milik user ubuntu, lalu cek sesi login aktif dan riwayat
 
 Buat user jane dengan home directory, pasang password, buat group secret-group, ubah group ownership /var/secret, lalu masukkan jane ke group tersebut
 
+Command:
+
     sudo useradd -m jane
     sudo passwd jane
     sudo groupadd secret-group
     sudo mkdir -p /var/secret
     sudo chown :secret-group /var/secret
     sudo usermod -a -G secret-group jane
-
     id jane
+
+Output:
 
     uid=1001(jane) gid=1001(jane) groups=1001(jane),1002(secret-group)
 

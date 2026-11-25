@@ -12,7 +12,11 @@ Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC
 
 Update daftar paket dan upgrade sistem di Debian/Ubuntu
 
+Command:
+
     sudo apt update && sudo apt upgrade -y
+
+Output:
 
     Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
     Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
@@ -21,7 +25,11 @@ Update daftar paket dan upgrade sistem di Debian/Ubuntu
 
 Update paket di RHEL, Amazon Linux, atau Fedora
 
+Command:
+
     sudo dnf update -y
+
+Output:
 
     Last metadata expiration check: 0:04:12 ago on Wed 25 Nov 2026 08:20:00 PM WIB.
     Dependencies resolved.
@@ -32,7 +40,11 @@ Update paket di RHEL, Amazon Linux, atau Fedora
 
 Scan port TCP yang terbuka secara lokal dengan nmap
 
+Command:
+
     nmap -v -sT localhost
+
+Output:
 
     Starting Nmap 7.94 ( https://nmap.org ) at 2026-11-25 20:30 WIB
     Initiating Connect Scan at 20:30
@@ -45,7 +57,11 @@ Scan port TCP yang terbuka secara lokal dengan nmap
 
 Scan port TCP dari luar ke host target
 
+Command:
+
     nmap -v -sT bootstrap-it.com
+
+Output:
 
     Starting Nmap 7.94 ( https://nmap.org ) at 2026-11-25 20:31 WIB
     PORT    STATE SERVICE
@@ -54,7 +70,11 @@ Scan port TCP dari luar ke host target
 
 Matikan dan disable service yang tidak terpakai seperti apache2
 
+Command:
+
     sudo systemctl disable --now apache2
+
+Output:
 
     Removed "/etc/systemd/system/multi-user.target.wants/apache2.service".
 
@@ -62,15 +82,25 @@ Matikan dan disable service yang tidak terpakai seperti apache2
 
 ## Mandatory Access Control dan Audit
 
-Cek status AppArmor (Ubuntu/Debian) atau SELinux (RHEL/Amazon Linux)
+Cek status AppArmor (Ubuntu/Debian)
+
+Command:
 
     sudo aa-status | head -n 4
+
+Output:
 
     apparmor module is loaded.
     42 profiles are loaded.
     40 profiles are in enforce mode.
 
+Cek status SELinux (RHEL/Amazon Linux)
+
+Command:
+
     getenforce
+
+Output:
 
     Enforcing
 

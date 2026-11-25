@@ -12,7 +12,11 @@ Catatan materi dari bootstrap-it.com/linux-admin
 
 Cek proses yang jalan di shell saat ini
 
+Command:
+
     ps
+
+Output:
 
       PID TTY          TIME CMD
      2410 pts/0    00:00:00 bash
@@ -20,7 +24,11 @@ Cek proses yang jalan di shell saat ini
 
 Cek seluruh proses dari semua user lalu filter service ssh
 
+Command:
+
     ps aux | grep ssh
+
+Output:
 
     root         790  0.0  0.1  15428  5820 ?        Ss   Nov21   0:02 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
     root        2395  0.0  0.2  17840  9124 ?        Ss   20:10   0:00 sshd: ubuntu [priv]
@@ -28,7 +36,11 @@ Cek seluruh proses dari semua user lalu filter service ssh
 
 Cari PID dan command lengkap tanpa memunculkan proses grep
 
+Command:
+
     pgrep -a sshd
+
+Output:
 
     790 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
     2395 sshd: ubuntu [priv]
@@ -38,7 +50,11 @@ Cari PID dan command lengkap tanpa memunculkan proses grep
 
 Cek log systemd dalam 10 menit terakhir
 
+Command:
+
     journalctl --since "10 minutes ago"
+
+Output:
 
     Nov 25 20:10:02 web01 sshd[2395]: Accepted publickey for ubuntu from 10.0.1.5 port 54122 ssh2
     Nov 25 20:10:02 web01 systemd-logind[612]: New session 14 of user ubuntu.
@@ -46,7 +62,11 @@ Cek log systemd dalam 10 menit terakhir
 
 Masuk ke /var/log dan lihat daftar file log yang tersedia
 
+Command:
+
     cd /var/log && ll
+
+Output:
 
     total 19432
     -rw-r----- 1 syslog adm   421840 Nov 25 20:10 auth.log
@@ -55,7 +75,11 @@ Masuk ke /var/log dan lihat daftar file log yang tersedia
 
 Filter log interface eno1 dari syslog
 
+Command:
+
     grep eno1 < /var/log/syslog | tail -n 3
+
+Output:
 
     Nov 25 19:40:11 web01 systemd-networkd[482]: eno1: Gained carrier
     Nov 25 19:40:13 web01 systemd-networkd[482]: eno1: DHCPv4 address 192.168.1.10/24 via 192.168.1.1
@@ -63,7 +87,11 @@ Filter log interface eno1 dari syslog
 
 Cek pesan kernel (hardware, driver, atau OOM killer) lewat dmesg
 
+Command:
+
     sudo dmesg | tail -n 4
+
+Output:
 
     [    4.120411] e1000e 0000:00:1f.6 eno1: NIC Link is Up 1000 Mbps Full Duplex, Flow Control: Rx/Tx
     [    4.120892] IPv6: ADDRCONF(NETDEV_CHANGE): eno1: link becomes ready
@@ -73,9 +101,13 @@ Cek pesan kernel (hardware, driver, atau OOM killer) lewat dmesg
 
 Jalankan proses dummy yes ke /dev/null di background untuk tes load CPU, lalu hentikan dengan kill memakai PID
 
+Command:
+
     yes > /dev/null &
     ps -p $!
     kill $!
+
+Output:
 
       PID TTY          TIME CMD
      2615 pts/0    00:00:04 yes
@@ -83,8 +115,12 @@ Jalankan proses dummy yes ke /dev/null di background untuk tes load CPU, lalu he
 
 Jika ingin langsung menembak nama proses tanpa mencari PID, gunakan killall (perintah kill butuh PID, bukan nama proses)
 
+Command:
+
     yes > /dev/null &
     killall yes
+
+Output:
 
     [1]+  Terminated              yes > /dev/null
 
@@ -94,22 +130,36 @@ Jika ingin langsung menembak nama proses tanpa mencari PID, gunakan killall (per
 
 Cek daftar unit service yang aktif saat boot
 
+Command:
+
     systemctl list-unit-files | grep enabled
+
+Output:
 
     cron.service                           enabled         enabled
     nginx.service                          enabled         enabled
     ssh.service                            enabled         enabled
     ufw.service                            enabled         enabled
 
-Cek status service apache2 lalu matikan sekaligus cabut dari startup
+Cek status service apache2
+
+Command:
 
     systemctl status apache2
+
+Output:
 
     ● apache2.service - The Apache HTTP Server
          Loaded: loaded (/lib/systemd/system/apache2.service; enabled; preset: enabled)
          Active: active (running) since Mon 2026-11-21 16:53:01 WIB; 4 days ago
 
+Matikan sekaligus cabut apache2 dari startup
+
+Command:
+
     sudo systemctl disable --now apache2
+
+Output:
 
     Synchronizing state of apache2.service with SysV service script with /lib/systemd/systemd-sysv-install.
     Removed "/etc/systemd/system/multi-user.target.wants/apache2.service".

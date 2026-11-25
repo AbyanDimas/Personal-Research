@@ -18,7 +18,11 @@ Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi AWS EC2
 
 Pengecekan proses, load average, dan pemakaian CPU/memory secara live dengan top
 
+Command:
+
     top
+
+Output:
 
     top - 20:15:04 up 4 days,  3:22,  1 user,  load average: 0.18, 0.12, 0.09
     Tasks: 112 total,   1 running, 111 sleeping,   0 stopped,   0 zombie
@@ -35,7 +39,11 @@ Pengecekan proses, load average, dan pemakaian CPU/memory secara live dengan top
 
 Cek ringkasan RAM dan swap tanpa tampilan interaktif
 
+Command:
+
     free -h
+
+Output:
 
                    total        used        free      shared  buff/cache   available
     Mem:           3.8Gi       984Mi       1.1Gi        12Mi       1.7Gi       2.6Gi
@@ -46,7 +54,11 @@ Cek ringkasan RAM dan swap tanpa tampilan interaktif
 
 Cek detail counter memory langsung dari kernel di /proc/meminfo
 
+Command:
+
     head -n 6 /proc/meminfo
+
+Output:
 
     MemTotal:        4006420 kB
     MemFree:         1170232 kB
@@ -59,7 +71,11 @@ Cek detail counter memory langsung dari kernel di /proc/meminfo
 
 Pengecekan partisi, kapasitas filesystem, dan tipe filesystem
 
+Command:
+
     df -hT
+
+Output:
 
     Filesystem     Type      Size  Used Avail Use% Mounted on
     tmpfs          tmpfs     392M  1.2M  391M   1% /run
@@ -68,7 +84,11 @@ Pengecekan partisi, kapasitas filesystem, dan tipe filesystem
 
 Filter output df khusus filesystem ext4 supaya tmpfs tidak ikut tampil
 
+Command:
+
     df -t ext4 -h
+
+Output:
 
     Filesystem      Size  Used Avail Use% Mounted on
     /dev/sda1        58G   18G   38G  32% /
@@ -77,7 +97,11 @@ Filter output df khusus filesystem ext4 supaya tmpfs tidak ikut tampil
 
 Cek folder mana yang paling banyak memakan storage di /var/log
 
+Command:
+
     sudo du -sh /var/log/*
+
+Output:
 
     4.2M    /var/log/auth.log
     180M    /var/log/journal
@@ -87,7 +111,11 @@ Cek folder mana yang paling banyak memakan storage di /var/log
 
 Pantau traffic jaringan secara live per koneksi pada interface eno1
 
+Command:
+
     sudo iftop -i eno1
+
+Output:
 
                      12.5Kb          25.0Kb          37.5Kb          50.0Kb
     +----------------+---------------+---------------+---------------+---------
@@ -99,7 +127,11 @@ Pantau traffic jaringan secara live per koneksi pada interface eno1
 
 Cek daftar port TCP/UDP yang sedang listening beserta PID pemiliknya
 
+Command:
+
     sudo ss -tulnp
+
+Output:
 
     Netid  State   Recv-Q  Send-Q   Local Address:Port   Peer Address:Port  Process
     udp    UNCONN  0       0        127.0.0.53%lo:53          0.0.0.0:*      users:(("systemd-resolve",pid=512,fd=13))

@@ -4,42 +4,34 @@ title: DevStack Homelab Overview & Practical Notes
 permalink: /docs/overview/devstack-lab-notes/
 ---
 
-# OpenStack DevStack Lab: Overview and Practical Notes
+# OpenStack DevStack Lab: Practical Notes
 
-## Running OpenStack on two 4GB VMs: What Actually Happened
+Catatan hasil eksperimen menjalankan OpenStack multi-node di dua VM Ubuntu 24.04.4 LTS dengan RAM 4GB dan disk 60GB per node
 
-Most OpenStack tutorials assume a beefy server with 16GB of RAM and a fast NVMe drive sitting around. That was not available here. What was available: two Ubuntu 24.04 VMs, 4GB of RAM each, 60GB of disk, sitting in a homelab. The question was whether a multi-node OpenStack environment could actually run on hardware this modest, just to understand how the pieces fit together.
+## Kenapa Pakai Hardware Terbatas
 
-Short answer: yes, but it is not going to be pleasant, and there is more to learn from the things that break than from the things that work.
+Kebanyakan tutorial mengasumsikan server 16GB RAM ke atas. Menjalankan lab di VM 4GB justru memaksa kita paham alur kerja aslinya—misalnya kenapa openstack server list memicu Nova Conductor kirim pesan RPC ke RabbitMQ sebelum query ke MySQL, dan berapa besar memory yang dimakan tiap daemon saat tidak ada headroom
 
-## Why Bother with Constrained Hardware
+## Setup Node
 
-There is a difference between operating something someone else built and actually watching it come together from nothing. The gap between running `openstack server list` and understanding why Nova Conductor talks to RabbitMQ before it talks to the database is bigger than it looks. A cramped lab forces real understanding of what each service is doing, because there is no resource headroom to skip past it.
-
-## The Setup
-
-Two nodes, same LAN, same subnet:
+Dua node berada di subnet LAN yang sama dengan satu NIC fisik (ens3) dan tanpa interface terpisah untuk provider network
 
 | Node | Hostname | IP | Role |
 |---|---|---|---|
-| Node 1 | `ab-lab-research-01` | `192.168.101.142` | Controller and network node |
-| Node 2 | `ab-lab-research-02` | `192.168.101.143` | Compute node |
+| Node 1 | ab-lab-research-01 | 192.168.101.142 | Controller & Network node |
+| Node 2 | ab-lab-research-02 | 192.168.101.143 | Compute node |
 
-Both run Ubuntu 24.04.4 LTS, a single NIC each (`ens3`), and no separate interface for provider networking. That last detail matters more than it sounds. A lot of OpenStack guides assume a spare NIC is available for the external bridge. There was not one here, so `br-ex` had to share the same physical interface as the management network.
+Pilihan deployment jatuh ke DevStack karena service dipasang langsung dari source git dan pip. Saat terjadi error, traceback Python dari kode service langsung terlihat tanpa terhalang layer container
 
-For the deployment tool, this went with DevStack instead of Kolla-ansible or a manual RDO-style install. DevStack is explicitly a dev and test tool, source installed through git and pip, restarted by hand rather than managed by systemd the way you would expect in enterprise production. That is exactly why it works well for learning. When something breaks, what shows up is a Python traceback from the actual service code, not a container log three abstraction layers removed from the problem.
+## Pembagian Role
 
-## Role Split Rationale
+- Node 1 menjalankan seluruh control-plane: Keystone, Nova API, Neutron server, Glance, MySQL, RabbitMQ, dan bridge br-ex
+- Node 2 dibiarkan ramping hanya menjalankan nova-compute dan OVN controller / Neutron L2 agent
+- Pemisahan ini untuk menghindari dua node sama-sama berebut RAM 4GB untuk API dan database
 
-With only two nodes and this little headroom, there is really one sane split. Node 01 carries everything control-plane related: Keystone, Nova API, Neutron server, Glance, MySQL, RabbitMQ, plus acting as the network node for `br-ex`. Node 02 stays lean, running only `nova-compute` and the OVN controller / Neutron L2 agent.
+## Networking Tanpa NIC Cadangan
 
-This is not a load balancing decision, it is survival. Putting API services on both nodes would mean fighting over the same scarce 4GB twice instead of once.
-
-## Networking Without a Spare NIC
-
-Since both nodes only have `ens3`, the external network has to live on the same physical link as management traffic. The practical answer is carving out a small unused range from the existing subnet for floating IPs, a `/28` block that was not handed out to anything else, and pointing `FLOATING_RANGE` and `PUBLIC_INTERFACE` at that. `br-ex` gets built on top of `ens3` instead of a dedicated interface.
-
----
+Karena hanya tersedia ens3, external network menumpang di jalur fisik yang sama dengan traffic management. Caranya dengan menyisihkan blok kecil /28 yang tidak terpakai di subnet LAN untuk FLOATING_RANGE dan mengarahkan PUBLIC_INTERFACE ke ens3 agar br-ex dibangun di atasnya
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/docs/overview/architecture/' | relative_url }}">&larr; Architecture & Topology</a>
