@@ -87,3 +87,8 @@ Gunakan key modern seperti Ed25519 atau RSA minimal 2048-bit dan hindari algorit
     $ chmod 600 ~/.ssh/authorized_keys
 
 Khusus di AWS, alternatif yang lebih aman daripada membuka port 22 dan mengelola static key adalah memakai AWS Systems Manager Session Manager yang mengandalkan IAM, atau EC2 Instance Connect yang memakai SSH key berumur pendek
+
+<div class="page-nav-box">
+  <a href="{{ '/docs/linux/processes/' | relative_url }}" class="page-nav-btn">&larr; Managing Processes</a>
+  <a href="{{ '/docs/linux/permissions-and-links/' | relative_url }}" class="page-nav-btn">Next: Permissions &amp; Symlinks &rarr;</a>
+</div>

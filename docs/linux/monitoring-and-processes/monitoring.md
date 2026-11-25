@@ -91,3 +91,8 @@ Sedangkan untuk melihat port TCP atau UDP mana saja yang lagi listening beserta 
 ## AWS EC2 Note
 
 Di lingkungan AWS EC2, command seperti top dan free -h cuma menampilkan apa yang dilihat kernel di dalam VM, sedangkan metrik di sisi hypervisor seperti CPUCreditBalance pada instance t3 atau t4g dan antrean disk EBS dipantau lewat Amazon CloudWatch
+
+<div class="page-nav-box">
+  <a href="{{ '/' | relative_url }}" class="page-nav-btn">&larr; Home</a>
+  <a href="{{ '/docs/linux/processes/' | relative_url }}" class="page-nav-btn">Next: Managing Processes &rarr;</a>
+</div>

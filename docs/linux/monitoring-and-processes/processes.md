@@ -100,3 +100,8 @@ Kalau ada service yang tidak dipakai seperti apache2, kita bisa cek dulu statusn
     $ sudo systemctl disable --now apache2
     Synchronizing state of apache2.service with SysV service script with /lib/systemd/systemd-sysv-install.
     Removed "/etc/systemd/system/multi-user.target.wants/apache2.service".
+
+<div class="page-nav-box">
+  <a href="{{ '/docs/linux/monitoring/' | relative_url }}" class="page-nav-btn">&larr; Monitoring System</a>
+  <a href="{{ '/docs/linux/users-and-groups/' | relative_url }}" class="page-nav-btn">Next: Users &amp; Groups &rarr;</a>
+</div>

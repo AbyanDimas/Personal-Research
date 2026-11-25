@@ -68,3 +68,8 @@ Pastikan sistem Mandatory Access Control bawaan distro tetap aktif, yaitu AppArm
     Enforcing
 
 Sebagai tambahan di sisi host, partisi seperti /tmp, /var, dan /home bisa dipasang dengan opsi nodev, nosuid, dan noexec di /etc/fstab kalau workload-nya mendukung. Untuk pencatatan perubahan file sensitif atau eskalasi hak akses, aktifkan auditd dan sesekali jalankan Lynis (sudo lynis audit system) untuk mengecek kesiapan sistem terhadap standar baseline CIS
+
+<div class="page-nav-box">
+  <a href="{{ '/docs/linux/permissions-and-links/' | relative_url }}" class="page-nav-btn">&larr; Permissions &amp; Symlinks</a>
+  <a href="{{ '/docs/linux/encryption/' | relative_url }}" class="page-nav-btn">Next: Data Encryption &rarr;</a>
+</div>
