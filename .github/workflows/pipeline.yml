@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: ci
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   lint:
-    name: Check Quality (Typos, Links, Security & PR Title)
+    name: lint & checks
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -72,7 +72,7 @@ jobs:
           fi
 
   build:
-    name: Build Jekyll Wiki
+    name: build site
     needs: [lint]
     runs-on: ubuntu-latest
     permissions:
@@ -97,7 +97,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
 
   deploy:
-    name: Deploy to GitHub Pages
+    name: deploy pages
     needs: [build]
     if: github.ref == 'refs/heads/pages' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -117,7 +117,7 @@ jobs:
         uses: actions/deploy-pages@v4
 
   release:
-    name: Automatic Release
+    name: release
     needs: [deploy]
     if: github.ref == 'refs/heads/pages' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -141,7 +141,7 @@ jobs:
           python3 scripts/auto-release.py
 
   sync-wiki:
-    name: Synchronize GitHub Wiki
+    name: sync wiki
     needs: [deploy]
     if: github.ref == 'refs/heads/pages' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
