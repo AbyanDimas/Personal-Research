@@ -13,7 +13,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 # Collect permalinks from all markdown files
 permalinks = {}
 for md_file in ROOT_DIR.rglob("*.md"):
-    if ".git" in md_file.parts or "_site" in md_file.parts or "unusued" in md_file.parts or "unused" in md_file.parts:
+    if ".git" in md_file.parts or "_site" in md_file.parts or "unused" in md_file.parts:
         continue
     try:
         content = md_file.read_text(encoding="utf-8")
@@ -34,7 +34,7 @@ link_pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 errors = []
 
 for md_file in ROOT_DIR.rglob("*.md"):
-    if ".git" in md_file.parts or "_site" in md_file.parts or "unusued" in md_file.parts or "unused" in md_file.parts:
+    if ".git" in md_file.parts or "_site" in md_file.parts or "unused" in md_file.parts:
         continue
     rel_source = md_file.relative_to(ROOT_DIR)
     try:
