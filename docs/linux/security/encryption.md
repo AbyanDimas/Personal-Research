@@ -6,8 +6,6 @@ permalink: /docs/linux/encryption/
 
 # Data Encryption
 
-Catatan materi dari dokumentasi AWS EBS/KMS dan referensi Linux LUKS/GPG
-
 ## Layer Infrastruktur: Amazon EBS Encryption
 
 - Enkripsi berjalan di level hardware AWS Nitro/hypervisor dengan AES-256

@@ -6,8 +6,6 @@ permalink: /docs/linux/users-and-groups/
 
 # Working with Users and Groups
 
-Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC2
-
 ## Best Practices Admin Power
 
 - Hindari login atau bekerja langsung memakai akun root
