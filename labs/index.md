@@ -17,8 +17,15 @@ labs/
 ├── devstack/
 │   ├── bootstrap.sh       # Automates OS prerequisites, user creation & git cloning
 │   └── local.conf         # Multi-service DevStack configuration template (OVN + Placement)
+├── linux/
+│   ├── health-check.sh    # Quick memory, disk, process, port, and journal snapshot
+│   ├── user-group-lab.sh  # User, group, permission, and symlink lab setup
+│   ├── hardening-audit.sh # Read-only boot service, port, and AppArmor/SELinux check
+│   └── index.md           # Linux lab scripts documentation
 └── README.md              # Quickstart guide for provisioning laboratory nodes
 ```
+
+For Linux lab scripts and usage examples, see [Linux Lab Scripts](/labs/linux/).
 
 ---
 

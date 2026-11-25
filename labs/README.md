@@ -4,6 +4,11 @@ This directory contains automation scripts, configuration recipes, and bootstrap
 
 ## Subdirectories
 
+- **`linux/`**:
+  - `health-check.sh`: Quick system monitoring snapshot (memory, disk, top processes, ports, journal errors).
+  - `user-group-lab.sh`: Automated lab setup for users, groups, `/var/secret` permissions, and symlinks.
+  - `hardening-audit.sh`: Read-only audit of enabled boot services, open local TCP ports, and AppArmor/SELinux status.
+
 - **`devstack/`**:
   - `bootstrap.sh`: One-liner environment preparation script for Ubuntu LTS hosts.
   - `local.conf`: Resource-constrained DevStack deployment configuration tuned for 4GB-8GB RAM nodes with OVN.

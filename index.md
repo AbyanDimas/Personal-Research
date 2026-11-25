@@ -1,53 +1,50 @@
 ---
 layout: default
-title: Introduction - OpenStack Research Documentation
+title: Personal Research Journal
 ---
 
-# OpenStack Research Documentation
+# Personal Research Journal
 
-This repository provides technical research and operational documentation for **OpenStack**, focused on private cloud architecture, multi-node lab implementation under strict hardware constraints (DevStack on dual 4GB RAM virtual machines), and modern OpenStack subsystems (covering releases **2025.1 Epoxy, 2025.2 Flamingo, and 2026.1 Gazpacho**).
+Just a place for my personal study notes, commands, and random technical experiments
 
----
+## Linux
 
-## Documentation Index
+### Monitoring & Processes
 
-The research documentation is structured into modular sections covering system architecture, deployment, core cloud services, and operational troubleshooting:
+- [Monitoring System](/docs/linux/monitoring/) - CPU, RAM, disk, network traffic, and CloudWatch vs OS metrics
+- [Managing System Processes](/docs/linux/processes/) - ps, journalctl, dmesg, kill/killall, and systemd units
 
-| Category | Module | Core Scope |
-|---|---|---|
-| **Overview** | [Architecture & Topology](./docs/overview/architecture/) | Multi-node topology, control-plane vs compute role split, and AMQP/SQL RPC communication flow. |
-| **Overview** | [Environment & Setup](./docs/overview/environment-setup/) | Ubuntu 24.04 LTS preparation, 8GB swap sizing, stack user permissions, and dual `local.conf` specifications. |
-| **Overview** | [DevStack Practical Notes](./docs/overview/devstack-lab-notes/) | Lessons learned from real-world homelab execution on constrained hardware. |
-| **Core Services** | [Keystone Architecture](./docs/core-services/keystone/) | Fernet token format, key rotation, system-scoped vs project-scoped RBAC, and service tokens. |
-| **Core Services** | [Nova & Placement API](./docs/core-services/nova-placement/) | Instance boot workflow, scheduler filter and weigh algorithms, and Placement resource provider modeling. |
-| **Core Services** | [Neutron & OVN](./docs/core-services/neutron-ovn/) | Modern OVN software-defined networking, Geneve encapsulation, distributed routing, and single-NIC bridge topology. |
-| **Core Services** | [Glance & Cinder Storage](./docs/core-services/storage/) | Disk image formats (RAW vs QCOW2), block storage lifecycle, and LVM loopback driver implementation. |
-| **Operations** | [Troubleshooting & Diagnostics](./docs/operations/troubleshooting/) | Out-Of-Memory prevention, AMQP heartbeat tuning, systemd user service management, and OVN database synchronization. |
-| **Operations** | [Kolla-Ansible (Multi-Node)](./docs/operations/kolla-ansible/) | Containerized microservices deployment with Docker/Podman, HAProxy VIP, and Ansible automation. |
-| **Labs & Automation** | [Lab Automation Assets](./labs/) | Ready-to-use DevStack bootstrap scripts, low-memory local.conf recipes, and operational configs. |
+### Users, Permissions & Links
 
----
+- [Working with Users and Groups](/docs/linux/users-and-groups/) - /etc/passwd, sudo best practices, useradd, groupadd, and EC2 SSH access
+- [Object Permissions & Symlinks](/docs/linux/permissions-and-links/) - numeric chmod notation, chown, and symbolic links
 
-## Recent OpenStack Releases (2025–2026)
+### Security
 
-OpenStack maintains a six-month release cadence consisting of SLURP (Support Long Term Upgrade Release Process) and non-SLURP cycles:
+- [Hardening Your Server](/docs/linux/hardening/) - patching, nmap port checks, Security Groups, AppArmor/SELinux, and auditd
+- [Data Encryption](/docs/linux/encryption/) - AWS EBS/KMS encryption, LUKS cryptsetup, and GPG
 
-- **Epoxy (2025.1) & Flamingo (2025.2):** Full standardization of OVN as the default networking mechanism; enhanced system-scoped token enforcement for administrative APIs.
-- **Gazpacho (2026.1):** Optimized Placement API query latency for specialized hardware traits and reduced idle memory footprint across Python control-plane daemons.
+### Labs
 
-```mermaid
-flowchart LR
-    Keystone["Keystone<br/>Identity & Auth"] --> Nova["Nova API<br/>Compute Request"]
-    Nova --> Placement["Placement API<br/>Resource Allocation"]
-    Placement --> NovaCompute["Nova Compute<br/>Libvirt / KVM"]
-    Nova --> Neutron["Neutron / OVN<br/>Network & Ports"]
-    Nova --> Glance["Glance<br/>Image Registry"]
-    Nova --> Cinder["Cinder<br/>Block Storage"]
-```
+- [Linux Lab Scripts](/labs/linux/) - bash scripts for health checks, user/group setup, and hardening audits
 
----
+## OpenStack
 
-<div class="page-nav-box">
-  <span></span>
-  <a class="page-nav-btn" href="{{ '/docs/overview/architecture/' | relative_url }}">Next: Architecture & Topology &rarr;</a>
-</div>
+### Overview
+
+- [Architecture & Topology](/docs/overview/architecture/) - multi-node DevStack topology, control-plane vs compute split, and AMQP/SQL RPC flow
+- [Environment & Setup](/docs/overview/environment-setup/) - Ubuntu 24.04 LTS prep, 8GB swap sizing, stack user permissions, and local.conf specs
+- [DevStack Lab Notes](/docs/overview/devstack-lab-notes/) - real-world homelab notes on constrained hardware
+
+### Core Services
+
+- [Keystone](/docs/core-services/keystone/) - Fernet tokens, key rotation, system-scoped vs project-scoped RBAC, and service tokens
+- [Nova & Placement](/docs/core-services/nova-placement/) - instance boot workflow, scheduler filters, and Placement resource providers
+- [Neutron & OVN](/docs/core-services/neutron-ovn/) - OVN software-defined networking, Geneve encapsulation, distributed routing, and single-NIC br-ex
+- [Glance & Cinder](/docs/core-services/storage/) - image formats (RAW vs QCOW2), block storage lifecycle, and LVM loopback driver
+
+### Operations & Labs
+
+- [Troubleshooting & Diagnostics](/docs/operations/troubleshooting/) - OOM prevention, AMQP heartbeat tuning, systemd services, and OVN DB sync
+- [Kolla-Ansible](/docs/operations/kolla-ansible/) - containerized multi-node deployment with Docker/Podman, HAProxy VIP, and Ansible
+- [Lab Scripts & Configs](/labs/) - DevStack bootstrap scripts and low-memory local.conf recipes

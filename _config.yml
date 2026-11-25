@@ -1,4 +1,6 @@
-title: OpenStack Research
-description: Technical research, architecture documentation, and DevStack lab guide
+title: Personal Research
+description: Nothing here, just my personal text & my research
 theme: jekyll-theme-dinky
 show_downloads: false
+exclude:
+  - scripts
