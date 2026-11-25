@@ -23,11 +23,13 @@ Perbandingan format image RAW vs QCOW2
 
 Upload image CirrOS ringan untuk tes boot instance
 
-    openstack image create "cirros-0.6.2" \
-      --file cirros-0.6.2-x86_64-disk.img \
-      --disk-format qcow2 \
-      --container-format bare \
-      --public
+```text
+openstack image create "cirros-0.6.2" \
+  --file cirros-0.6.2-x86_64-disk.img \
+  --disk-format qcow2 \
+  --container-format bare \
+  --public
+```
 
 ## 2. Cinder: Persistent Block Storage
 
@@ -39,11 +41,13 @@ Disk ephemeral bawaan Nova akan hilang saat instance dihapus, sedangkan volume C
 
 ```mermaid
 flowchart LR
-    NovaCompute["Nova Compute (Node 02)"] -->|Volume Attach Request| CinderAPI["Cinder API"]
-    CinderAPI --> CinderScheduler["Cinder Scheduler"]
-    CinderScheduler --> CinderVolume["Cinder Volume Driver"]
-    CinderVolume -->|iSCSI Target / LVM Volume| StorageBackend[("Storage Backend (LVM / Ceph)")]
-    StorageBackend -.->|iSCSI Block Session| NovaCompute
+```text
+NovaCompute["Nova Compute (Node 02)"] -->|Volume Attach Request| CinderAPI["Cinder API"]
+CinderAPI --> CinderScheduler["Cinder Scheduler"]
+CinderScheduler --> CinderVolume["Cinder Volume Driver"]
+CinderVolume -->|iSCSI Target / LVM Volume| StorageBackend[("Storage Backend (LVM / Ceph)")]
+StorageBackend -.->|iSCSI Block Session| NovaCompute
+```
 ```
 
 ## 3. Implementasi LVM Loopback di Homelab
@@ -52,20 +56,20 @@ Di lab DevStack terbatas, Cinder memakai loopback file yang dijadikan volume gro
 
 Cek pool LVM aktif lalu buat dan attach volume tes berukuran 5 GB
 
-Command:
+```bash
+sudo vgs
+sudo lvs
+```
 
-    sudo vgs
-    sudo lvs
+```text
+VG                    #PV #LV #SN Attr   VSize  VFree
+stack-volumes-default   1   0   0 wz--n- 24.00g 24.00g
+```
 
-Output:
-
-    VG                    #PV #LV #SN Attr   VSize  VFree
-    stack-volumes-default   1   0   0 wz--n- 24.00g 24.00g
-
-Command:
-
-    openstack volume create --size 5 test-volume-01
-    openstack server add volume my-instance test-volume-01
+```bash
+openstack volume create --size 5 test-volume-01
+openstack server add volume my-instance test-volume-01
+```
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/docs/core-services/neutron-ovn/' | relative_url }}">&larr; Neutron & OVN</a>

@@ -19,110 +19,110 @@ Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC
 
 Cek daftar user di /etc/passwd (bisa dibaca semua user)
 
-Command:
+```bash
+tail -n 3 /etc/passwd
+```
 
-    tail -n 3 /etc/passwd
-
-Output:
-
-    systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
-    ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash
-    jane:x:1001:1001::/home/jane:/bin/bash
+```text
+systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
+ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash
+jane:x:1001:1001::/home/jane:/bin/bash
+```
 
 Cek hash password di /etc/shadow (khusus root/shadow)
 
-Command:
+```bash
+sudo tail -n 2 /etc/shadow
+```
 
-    sudo tail -n 2 /etc/shadow
-
-Output:
-
-    ubuntu:$y$j9T$abc123.../:19850:0:99999:7:::
-    jane:$y$j9T$xyz789.../:20052:0:99999:7:::
+```text
+ubuntu:$y$j9T$abc123.../:19850:0:99999:7:::
+jane:$y$j9T$xyz789.../:20052:0:99999:7:::
+```
 
 Cek daftar group di /etc/group
 
-Command:
+```bash
+tail -n 3 /etc/group
+```
 
-    tail -n 3 /etc/group
-
-Output:
-
-    ubuntu:x:1000:
-    jane:x:1001:
-    secret-group:x:1002:jane
+```text
+ubuntu:x:1000:
+jane:x:1001:
+secret-group:x:1002:jane
+```
 
 Cek file template default di /etc/skel
 
-Command:
+```bash
+ls -a /etc/skel
+```
 
-    ls -a /etc/skel
-
-Output:
-
-    .  ..  .bash_logout  .bashrc  .profile
+```text
+.  ..  .bash_logout  .bashrc  .profile
+```
 
 ## Account Activity Data
 
 Cek UID, GID, dan group milik user ubuntu
 
-Command:
+```bash
+id ubuntu
+```
 
-    id ubuntu
-
-Output:
-
-    uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),27(sudo)
+```text
+uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),27(sudo)
+```
 
 Cek sesi login aktif dengan who dan w
 
-Command:
+```bash
+who
+```
 
-    who
+```text
+ubuntu   pts/0        2026-11-25 20:10 (10.0.1.5)
+```
 
-Output:
+```bash
+w
+```
 
-    ubuntu   pts/0        2026-11-25 20:10 (10.0.1.5)
-
-Command:
-
-    w
-
-Output:
-
-     20:22:14 up 4 days,  3:29,  1 user,  load average: 0.08, 0.10, 0.09
-    USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
-    ubuntu   pts/0    10.0.1.5         20:10    0.00s  0.04s  0.00s w
+```text
+ 20:22:14 up 4 days,  3:29,  1 user,  load average: 0.08, 0.10, 0.09
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+ubuntu   pts/0    10.0.1.5         20:10    0.00s  0.04s  0.00s w
+```
 
 Cek riwayat login terakhir dengan last
 
-Command:
+```bash
+last -n 3
+```
 
-    last -n 3
-
-Output:
-
-    ubuntu   pts/0        10.0.1.5         Wed Nov 25 20:10   still logged in
-    ubuntu   pts/0        10.0.1.5         Tue Nov 24 09:14 - 11:42  (02:28)
-    reboot   system boot  6.8.0-45-generic Fri Nov 21 16:53   still running
+```text
+ubuntu   pts/0        10.0.1.5         Wed Nov 25 20:10   still logged in
+ubuntu   pts/0        10.0.1.5         Tue Nov 24 09:14 - 11:42  (02:28)
+reboot   system boot  6.8.0-45-generic Fri Nov 21 16:53   still running
+```
 
 ## Managing Accounts dan Groups
 
 Buat user jane dengan home directory, pasang password, buat group secret-group, ubah group ownership /var/secret, lalu masukkan jane ke group tersebut
 
-Command:
+```bash
+sudo useradd -m jane
+sudo passwd jane
+sudo groupadd secret-group
+sudo mkdir -p /var/secret
+sudo chown :secret-group /var/secret
+sudo usermod -a -G secret-group jane
+id jane
+```
 
-    sudo useradd -m jane
-    sudo passwd jane
-    sudo groupadd secret-group
-    sudo mkdir -p /var/secret
-    sudo chown :secret-group /var/secret
-    sudo usermod -a -G secret-group jane
-    id jane
-
-Output:
-
-    uid=1001(jane) gid=1001(jane) groups=1001(jane),1002(secret-group)
+```text
+uid=1001(jane) gid=1001(jane) groups=1001(jane),1002(secret-group)
+```
 
 - Flag -a pada usermod -a -G wajib dipakai supaya group lama milik user tidak terhapus
 
@@ -130,14 +130,18 @@ Output:
 
 Matikan login password dan blokir root login di /etc/ssh/sshd_config
 
-    PasswordAuthentication no
-    PubkeyAuthentication yes
-    PermitRootLogin no
+```text
+PasswordAuthentication no
+PubkeyAuthentication yes
+PermitRootLogin no
+```
 
 Gunakan key Ed25519 atau RSA 2048-bit+ dan jaga permission folder .ssh tiap user
 
-    chmod 700 ~/.ssh
-    chmod 600 ~/.ssh/authorized_keys
+```text
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+```
 
 - Di AWS EC2, alternatif tanpa membuka port 22 dan mengelola static key adalah AWS Systems Manager Session Manager (via IAM) atau EC2 Instance Connect (short-lived SSH key)
 

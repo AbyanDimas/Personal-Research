@@ -23,43 +23,43 @@ Kombinasi umum yang sering dipakai
 
 Ubah permission /var/secret menjadi 750
 
-Command:
+```bash
+ls -ld /var/secret
+sudo chmod 750 /var/secret
+ls -ld /var/secret
+```
 
-    ls -ld /var/secret
-    sudo chmod 750 /var/secret
-    ls -ld /var/secret
-
-Output:
-
-    drwxr-xr-x 2 root secret-group 4096 Nov 25 20:25 /var/secret
-    drwxr-x--- 2 root secret-group 4096 Nov 25 20:25 /var/secret
+```text
+drwxr-xr-x 2 root secret-group 4096 Nov 25 20:25 /var/secret
+drwxr-x--- 2 root secret-group 4096 Nov 25 20:25 /var/secret
+```
 
 Buat file dan atur owner menjadi jane:secret-group
 
-Command:
+```bash
+sudo touch /var/secret/note.txt
+sudo chown jane:secret-group /var/secret/note.txt
+ls -l /var/secret/note.txt
+```
 
-    sudo touch /var/secret/note.txt
-    sudo chown jane:secret-group /var/secret/note.txt
-    ls -l /var/secret/note.txt
-
-Output:
-
-    -rw-r--r-- 1 jane secret-group 0 Nov 25 20:26 /var/secret/note.txt
+```text
+-rw-r--r-- 1 jane secret-group 0 Nov 25 20:26 /var/secret/note.txt
+```
 
 ## Extending Object Usability
 
 Buat symbolic link ke /home/ubuntu/scripts/myscript.sh di dalam /var/secret
 
-Command:
+```bash
+sudo ln -s /home/ubuntu/scripts/myscript.sh /var/secret
+ls -l /var/secret
+```
 
-    sudo ln -s /home/ubuntu/scripts/myscript.sh /var/secret
-    ls -l /var/secret
-
-Output:
-
-    total 0
-    lrwxrwxrwx 1 root root         32 Nov 25 20:28 myscript.sh -> /home/ubuntu/scripts/myscript.sh
-    -rw-r--r-- 1 jane secret-group  0 Nov 25 20:26 note.txt
+```text
+total 0
+lrwxrwxrwx 1 root root         32 Nov 25 20:28 myscript.sh -> /home/ubuntu/scripts/myscript.sh
+-rw-r--r-- 1 jane secret-group  0 Nov 25 20:26 note.txt
+```
 
 - Selalu pakai absolute path saat membuat symlink supaya link tidak putus ketika dipanggil dari direktori lain
 - Symlink bisa menunjuk ke direktori dan melintasi filesystem berbeda (berbeda dengan hard link)

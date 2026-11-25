@@ -20,26 +20,26 @@ Dipakai saat butuh double encryption (layer infrastruktur + OS) atau untuk volum
 
 Format partisi /dev/sdb1 dengan LUKS, buka mapper, buat filesystem ext4, lalu mount
 
-Command:
-
-    sudo cryptsetup luksFormat /dev/sdb1
-    sudo cryptsetup open /dev/sdb1 secure_data
-    sudo mkfs.ext4 /dev/mapper/secure_data
-    sudo mkdir -p /mnt/secure
-    sudo mount /dev/mapper/secure_data /mnt/secure
+```bash
+sudo cryptsetup luksFormat /dev/sdb1
+sudo cryptsetup open /dev/sdb1 secure_data
+sudo mkfs.ext4 /dev/mapper/secure_data
+sudo mkdir -p /mnt/secure
+sudo mount /dev/mapper/secure_data /mnt/secure
+```
 
 Cek hasil mapping block device dengan lsblk
 
-Command:
+```bash
+lsblk /dev/sdb
+```
 
-    lsblk /dev/sdb
-
-Output:
-
-    NAME          MAJ:MIN RM SIZE RO TYPE  MOUNTPOINTS
-    sdb             8:16   0  10G  0 disk
-    └─sdb1          8:17   0  10G  0 part
-      └─secure_data 253:0  0  10G  0 crypt /mnt/secure
+```text
+NAME          MAJ:MIN RM SIZE RO TYPE  MOUNTPOINTS
+sdb             8:16   0  10G  0 disk
+└─sdb1          8:17   0  10G  0 part
+  └─secure_data 253:0  0  10G  0 crypt /mnt/secure
+```
 
 - Untuk server headless saat reboot, unlock bisa memakai dropbear SSH di initramfs atau fetch key dari AWS KMS saat boot (seperti di Amazon EMR dan AWS ParallelCluster)
 
@@ -47,27 +47,27 @@ Output:
 
 Enkripsi simetris file memakai passphrase
 
-Command:
+```bash
+gpg -c secret.txt
+ls -l secret.txt*
+```
 
-    gpg -c secret.txt
-    ls -l secret.txt*
-
-Output:
-
-    -rw-r--r-- 1 ubuntu ubuntu 24 Nov 25 20:35 secret.txt
-    -rw-r--r-- 1 ubuntu ubuntu 78 Nov 25 20:35 secret.txt.gpg
+```text
+-rw-r--r-- 1 ubuntu ubuntu 24 Nov 25 20:35 secret.txt
+-rw-r--r-- 1 ubuntu ubuntu 78 Nov 25 20:35 secret.txt.gpg
+```
 
 Dekripsi kembali file GPG ke stdout
 
-Command:
+```bash
+gpg -d secret.txt.gpg
+```
 
-    gpg -d secret.txt.gpg
-
-Output:
-
-    gpg: AES256.CFB encrypted data
-    gpg: encrypted with 1 passphrase
-    my-db-password-123
+```text
+gpg: AES256.CFB encrypted data
+gpg: encrypted with 1 passphrase
+my-db-password-123
+```
 
 <div class="page-nav-box">
   <a href="{{ '/docs/linux/hardening/' | relative_url }}" class="page-nav-btn">&larr; Server Hardening</a>
