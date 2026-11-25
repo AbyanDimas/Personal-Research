@@ -6,31 +6,20 @@ permalink: /docs/overview/architecture/
 
 # OpenStack DevStack Architecture & Lab Topology
 
-This document provides a detailed breakdown of the multi-node **DevStack** lab environment built on constrained hardware: **two Ubuntu 24.04 LTS virtual machines, each provisioned with 4GB RAM and 60GB disk space**.
+Dokumentasi arsitektur lab multi-node DevStack di atas resource terbatas: dua VM Ubuntu 24.04 LTS dengan masing-masing 4GB RAM dan disk 60GB
 
----
+## Batasan Lab
 
-## Lab Constraints and Rationale
+Panduan OpenStack umumnya mengasumsikan RAM 16GB sampai 32GB per node. Menjalankan cluster multi-node di VM 4GB memaksa kita memahami konsumsi memory tiap daemon dan cara kerjanya, terutama untuk menjaga agar systemd-oomd tidak mematikan mysqld atau beam.smp (RabbitMQ)
 
-Most OpenStack deployment guides assume servers with at least 16GB–32GB RAM per node. Operating a multi-node cluster under strict resource limits (4GB per VM) forces an explicit understanding of each daemon's resource consumption and interaction patterns.
+## Topologi Node dan Pembagian Role
 
-> [!NOTE]
-> **Operational Insight:**
-> The architectural difference between executing `openstack server list` and understanding why Nova Conductor dispatches an RPC message via RabbitMQ before querying MySQL represents the core mechanism of OpenStack orchestration.
+Lab berjalan di dua node dalam satu subnet LAN yang sama
 
-> [!IMPORTANT]
-> Because each VM has only 4GB RAM, memory overcommit and swap management must be configured correctly to prevent `systemd-oomd` from terminating `mysqld` or `beam.smp` (RabbitMQ).
-
----
-
-## Node Topology and Role Allocation
-
-The lab is configured across two nodes within the same physical LAN subnet:
-
-| Node | Hostname | IP Address | Assigned Roles and Daemons |
+| Node | Hostname | IP Address | Role & Daemon |
 |---|---|---|---|
-| **Node 1** | `ab-lab-research-01` | `192.168.101.142` | **Controller & Network Node**<br/>Keystone, Nova API, Nova Conductor, Nova Scheduler, Glance, Neutron Server, MySQL, RabbitMQ, OVN Central |
-| **Node 2** | `ab-lab-research-02` | `192.168.101.143` | **Compute Node**<br/>`nova-compute`, libvirt, KVM, OVN Controller (`ovn-controller`) |
+| Node 1 | ab-lab-research-01 | 192.168.101.142 | Controller & Network Node: Keystone, Nova API, Nova Conductor, Nova Scheduler, Glance, Neutron Server, MySQL, RabbitMQ, OVN Central |
+| Node 2 | ab-lab-research-02 | 192.168.101.143 | Compute Node: nova-compute, libvirt, KVM, ovn-controller |
 
 ```mermaid
 flowchart TB
@@ -56,28 +45,19 @@ flowchart TB
     DATA <-- "AMQP RPC via RabbitMQ & SQL connection" --> COMPUTE
 ```
 
----
+## Alur Kontrol dan Komunikasi
 
-## Communication and Control Flow
+- Node 2 tidak melakukan scheduling sendiri; keputusan penempatan VM sepenuhnya dikerjakan Node 1 lewat Nova Scheduler dan Placement API, lalu Node 2 mengeksekusi lewat libvirt/KVM
+- Tidak ada koneksi SSH antar node saat provisioning instance; koordinasi berjalan lewat RabbitMQ (AMQP) dan koneksi langsung ke MySQL
+- Seluruh service API dan database dikonsolidasikan di Node 1 supaya Node 2 fokus ke proses hypervisor dan VM user
 
-1. **Stateless Compute Execution:**  
-   Node 2 does not perform independent scheduling or network planning. Scheduling decisions are executed entirely on Node 1 via Nova Scheduler and the Placement API. Node 2 operates as an execution target, provisioning KVM instances through libvirt and wiring virtual interfaces upon instruction.
-2. **Elimination of Inter-Node SSH:**  
-   No SSH connections are used between the controller and compute nodes during instance provisioning. All coordination occurs asynchronously via **RabbitMQ (AMQP)** and direct **MySQL** database connections using service credentials.
-3. **Control Plane Isolation:**  
-   To prevent Out-Of-Memory (OOM) termination on 4GB nodes, all API and database services are strictly consolidated onto Node 1, leaving Node 2 dedicated to hypervisor processes and user instances.
+## Konfigurasi External Network Single NIC
 
----
+Karena tiap VM hanya punya satu interface fisik (ens3), external bridge Open vSwitch br-ex menumpang di interface yang sama
 
-## Single NIC External Network Configuration
-
-Standard OpenStack topologies require dedicated physical network interfaces for management traffic and provider networks. To operate with a single physical NIC (`ens3`), the external Open vSwitch bridge `br-ex` shares the interface:
-
-- The `br-ex` bridge is attached directly to `ens3`.
-- A dedicated `/28` address block from the local LAN subnet is assigned to the OpenStack Floating IP pool.
-- The DevStack configuration sets `PUBLIC_INTERFACE=ens3` and maps `FLOATING_RANGE` directly onto the unused host subnet block.
-
----
+- Bridge br-ex dipasang langsung ke ens3
+- Blok IP /28 yang kosong di subnet LAN dialokasikan untuk pool Floating IP OpenStack
+- Konfigurasi DevStack memakai PUBLIC_INTERFACE=ens3 dan FLOATING_RANGE mengarah ke blok subnet tersebut
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/' | relative_url }}">&larr; Introduction</a>

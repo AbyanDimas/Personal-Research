@@ -1,71 +1,50 @@
 ---
 layout: default
-title: Lab Scripts & Automation - OpenStack Research Documentation
+title: Lab Scripts & Automation - Personal Research Journal
 permalink: /labs/
 ---
 
 # Lab Automation Scripts & Configurations
 
-This section provides production-ready configuration templates, bootstrap scripts, and automation assets used across our OpenStack lab environments.
+Kumpulan script bootstrap dan template konfigurasi untuk lab Linux dan OpenStack
 
----
+## Struktur Direktori
 
-## Directory Structure
+    labs/
+    ├── devstack/
+    │   ├── bootstrap.sh       # Setup OS, user stack, dan clone devstack
+    │   └── local.conf         # Template DevStack (OVN + Placement) untuk RAM 4GB
+    ├── linux/
+    │   ├── health-check.sh    # Snapshot memory, disk, proses, port, dan journal
+    │   ├── user-group-lab.sh  # Latihan user, group, permission, dan symlink
+    │   ├── hardening-audit.sh # Audit read-only service boot, port, dan MAC
+    │   └── index.md           # Dokumentasi script lab Linux
+    └── README.md              # Panduan quickstart
 
-```text
-labs/
-├── devstack/
-│   ├── bootstrap.sh       # Automates OS prerequisites, user creation & git cloning
-│   └── local.conf         # Multi-service DevStack configuration template (OVN + Placement)
-├── linux/
-│   ├── health-check.sh    # Quick memory, disk, process, port, and journal snapshot
-│   ├── user-group-lab.sh  # User, group, permission, and symlink lab setup
-│   ├── hardening-audit.sh # Read-only boot service, port, and AppArmor/SELinux check
-│   └── index.md           # Linux lab scripts documentation
-└── README.md              # Quickstart guide for provisioning laboratory nodes
-```
-
-For Linux lab scripts and usage examples, see [Linux Lab Scripts]({{ '/labs/linux/' | relative_url }}).
-
----
+Untuk script lab Linux, lihat [Linux Lab Scripts]({{ '/labs/linux/' | relative_url }})
 
 ## DevStack Lab Automation
 
-### 1. `bootstrap.sh`
-The bootstrap script prepares a clean Ubuntu 22.04 LTS or 24.04 LTS virtual machine for DevStack deployment. It performs the following steps:
-- Installs necessary base system utilities (`git`, `sudo`, `curl`, `bridge-utils`).
-- Creates the dedicated unprivileged `stack` user with passwordless `sudo` rights.
-- Configures kernel parameters for packet forwarding (`net.ipv4.ip_forward = 1`).
-- Clones the official DevStack repository onto the `stack` user's home directory.
+### 1. bootstrap.sh
 
-To execute on a new laboratory VM:
-```bash
-curl -fsSL https://raw.githubusercontent.com/AbyanDimas/Opentack-Research/pages/labs/devstack/bootstrap.sh | sudo bash
-```
+Menyiapkan VM Ubuntu 22.04 LTS atau 24.04 LTS untuk DevStack: install git/sudo/curl/bridge-utils, buat user stack dengan passwordless sudo, aktifkan net.ipv4.ip_forward = 1, dan clone repo DevStack
 
-### 2. `local.conf`
-A reference configuration tuned for single-node and multi-node controller setups under constrained memory environments (4GB RAM). It includes:
-- OVN / OVS network backend integration.
-- Keystone, Glance, Nova, Placement, and Neutron enablement.
-- Optimized worker daemon concurrency (`API_WORKERS=2`, `CONDUCTOR_WORKERS=2`) to prevent out-of-memory crashes.
+    curl -fsSL https://raw.githubusercontent.com/AbyanDimas/Personal-Research/pages/labs/devstack/bootstrap.sh | sudo bash
 
-Download and place into `/opt/stack/devstack/local.conf`:
-```bash
-su - stack
-cd /opt/stack/devstack
-cp /path/to/Opentack-Research/labs/devstack/local.conf ./local.conf
-./stack.sh
-```
+### 2. local.conf
 
----
+Konfigurasi untuk environment RAM 4GB dengan OVN/OVS, Keystone, Glance, Nova, Placement, Neutron, dan worker dibatasi (API_WORKERS=2, CONDUCTOR_WORKERS=2) agar tidak OOM
+
+    su - stack
+    cd /opt/stack/devstack
+    cp /path/to/Personal-Research/labs/devstack/local.conf ./local.conf
+    ./stack.sh
 
 ## Kolla-Ansible Assets
 
-For multi-node containerized deployments, refer to the operational documentation in [Kolla-Ansible Multi-Node Deployment]({{ '/docs/operations/kolla-ansible/' | relative_url }}).
-
----
+Untuk deployment multi-node berbasis container, lihat panduan di [Kolla-Ansible Multi-Node Deployment]({{ '/docs/operations/kolla-ansible/' | relative_url }})
 
 <div class="page-nav-box">
-  <a href="{{ '/docs/operations/kolla-ansible/' | relative_url }}" class="page-nav-btn">← Kolla-Ansible Guide</a>
-  <a href="{{ '/' | relative_url }}" class="page-nav-btn">Back to Home →</a>
+  <a href="{{ '/docs/operations/kolla-ansible/' | relative_url }}" class="page-nav-btn">&larr; Kolla-Ansible Guide</a>
+  <a href="{{ '/' | relative_url }}" class="page-nav-btn">Back to Home &rarr;</a>
 </div>

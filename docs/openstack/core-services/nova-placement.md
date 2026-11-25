@@ -6,19 +6,16 @@ permalink: /docs/core-services/nova-placement/
 
 # Nova: Compute Orchestration & Placement API
 
-Nova orchestrates the full lifecycle of compute instances, managing scheduling, provisioning, resizing, and teardown across hypervisor nodes.
+Nova mengatur siklus hidup instance mulai dari scheduling, provisioning, resize, sampai penghapusan VM di node hypervisor
 
----
+## 1. Placement API dan Inventory Modeling
 
-## 1. Placement API and Inventory Modeling
+Placement API mencatat kapasitas dan alokasi resource compute supaya Nova Scheduler tidak perlu polling langsung ke tiap hypervisor
 
-The Placement API tracks inventory and allocations for compute resources, preventing race conditions and eliminating the need for Nova Scheduler to poll hypervisors directly.
-
-Core Placement abstractions:
-- **Resource Provider (RP):** An entity that provides compute or storage capacity (e.g., hypervisor host `ab-lab-research-02`).
-- **Inventory:** Quantitative capacity of an RP for specific classes (`VCPU`, `MEMORY_MB`, `DISK_GB`).
-- **Traits:** Qualitative capabilities associated with an RP (e.g., `HW_CPU_X86_AVX2`, `CUSTOM_NVME`).
-- **Allocations:** Reserved and consumed resources attributed to active instances.
+- Resource Provider (RP): entitas penyedia kapasitas seperti host hypervisor ab-lab-research-02
+- Inventory: kapasitas kuantitatif milik RP seperti VCPU, MEMORY_MB, dan DISK_GB
+- Traits: kapabilitas kualitatif pada RP misalnya HW_CPU_X86_AVX2 atau CUSTOM_NVME
+- Allocations: resource yang sudah direservasi oleh instance aktif
 
 ```mermaid
 flowchart LR
@@ -28,40 +25,27 @@ flowchart LR
     NovaScheduler -->|Build Request via AMQP| NovaCompute["Nova Compute (Node 02)"]
 ```
 
----
+## 2. Alur Boot Instance
 
-## 2. Instance Boot Lifecycle
+Saat menjalankan openstack server create, urutannya berjalan seperti berikut
 
-When an operator executes `openstack server create`, the following coordination sequence takes place:
+- Nova API memvalidasi token via Keystone, mengecek quota, lalu membuat record database berstatus BUILDING
+- Nova Conductor mengoordinasikan request scheduling tanpa memberi akses database langsung ke compute node
+- Nova Scheduler mengecek Placement API untuk mencari Resource Provider yang memenuhi flavor lalu memilih host lewat weigher (RAM/CPU)
+- Nova Conductor mengirim pesan AMQP lewat RabbitMQ ke nova-compute di Node 2
+- nova-compute meminta alokasi virtual port dan IP ke Neutron, lalu menarik base image dari Glance ke /opt/stack/data/nova/instances/_base
+- Libvirt driver membuat XML domain dan menyalakan proses KVM
 
-1. **Nova API:** Authenticates the request via Keystone, validates quota and parameters, and creates a database record in state `BUILDING`.
-2. **Nova Conductor:** Orchestrates scheduling requests without exposing compute hosts directly to the primary database.
-3. **Nova Scheduler & Placement:**
-   - Queries Placement for Resource Providers satisfying minimum flavor requirements.
-   - Evaluates eligible hosts using configurable weighers (e.g., RAM weigher, CPU weigher).
-4. **RabbitMQ RPC:** Nova Conductor dispatches an AMQP cast message to `nova-compute` on the selected host (Node 2).
-5. **Neutron & Glance Integration:**
-   - `nova-compute` requests virtual port and IP allocation from Neutron.
-   - `nova-compute` pulls the base disk image from Glance into the host base cache (`/opt/stack/data/nova/instances/_base`).
-6. **Libvirt Driver:** Generates libvirt domain XML and launches the KVM process.
+## 3. Tuning Alokasi Memory di Homelab 4GB
 
----
+Di node dengan RAM terbatas, parameter overcommit pada nova.conf wajib dibatasi supaya host tidak terkena OOM killer
 
-## 3. Memory Allocation Tuning for 4GB Homelab
+    [DEFAULT]
+    cpu_allocation_ratio = 4.0
+    ram_allocation_ratio = 1.0
+    reserved_host_memory_mb = 1024
 
-On nodes with limited physical memory, overcommit parameters in `nova.conf` must be constrained to prevent kernel OOM intervention:
-
-```ini
-[DEFAULT]
-cpu_allocation_ratio = 4.0
-ram_allocation_ratio = 1.0
-reserved_host_memory_mb = 1024
-```
-
-> **Operational Standard:**  
-> Maintaining `ram_allocation_ratio = 1.0` prevents virtual machine processes from over-allocating physical memory, guaranteeing sufficient buffer space for system daemons and Open vSwitch flows.
-
----
+- Menjaga ram_allocation_ratio = 1.0 mencegah over-alokasi RAM fisik oleh VM dan menyisakan 1024 MB untuk daemon sistem serta Open vSwitch
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/docs/core-services/keystone/' | relative_url }}">&larr; Keystone (Identity)</a>

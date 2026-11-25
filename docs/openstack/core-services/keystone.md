@@ -6,17 +6,15 @@ permalink: /docs/core-services/keystone/
 
 # Keystone: Identity Service Architecture
 
-Keystone provides centralized authentication, authorization, and service discovery across the OpenStack cloud ecosystem. Every interaction with Nova, Neutron, Glance, and Cinder requires validation through Keystone.
+Keystone menangani autentikasi, otorisasi, dan service discovery di OpenStack. Setiap request ke Nova, Neutron, Glance, dan Cinder divalidasi lewat Keystone
 
----
+## 1. Arsitektur Fernet Token
 
-## 1. Fernet Token Architecture
+OpenStack modern meninggalkan token UUID dan PKI karena UUID butuh lookup database terus-menerus dan PKI ukuran header HTTP-nya terlalu besar. Penggantinya adalah Fernet Token
 
-Legacy UUID and PKI token implementations introduced performance bottlenecks (UUID tokens required continuous database lookups; PKI tokens exceeded HTTP header limits). Modern OpenStack implementations rely on **Fernet Tokens**:
-
-- **Characteristics:** Compact (~255 characters), symmetric AES-128-CBC encryption, authenticated with HMAC-SHA256.
-- **Stateless Validation:** Keystone does not store active tokens in the MySQL database. Verification is computed cryptographically using symmetric keys located at `/etc/keystone/fernet-keys/`.
-- **Key Rotation:** Tokens are rotated periodically using `keystone-manage fernet_rotate`.
+- Ukuran ringkas sekitar 255 karakter, memakai enkripsi simetris AES-128-CBC dengan autentikasi HMAC-SHA256
+- Validasi bersifat stateless karena Keystone tidak menyimpan token aktif di MySQL; verifikasi dihitung dari symmetric key di /etc/keystone/fernet-keys/
+- Rotasi key dilakukan berkala dengan perintah keystone-manage fernet_rotate
 
 ```mermaid
 sequenceDiagram
@@ -33,30 +31,25 @@ sequenceDiagram
     Nova-->>User: Server List (HTTP 200)
 ```
 
----
+## 2. RBAC Policy Scoping
 
-## 2. RBAC Policy Scoping (System vs. Project)
+Pembagian scope token untuk mencegah privilege escalation
 
-Modern OpenStack releases enforce strict boundary scoping to prevent privilege escalation:
-
-| Token Scope | Target Boundary | Example Capabilities |
+| Token Scope | Batas Akses | Contoh Kemampuan |
 |---|---|---|
-| **System-Scoped** | Global physical infrastructure management. | Hypervisor management, global network provider binding, control-plane log inspection. |
-| **Domain-Scoped** | Administrative boundaries for tenants/organizations. | User lifecycle, group membership, project quota allocations. |
-| **Project-Scoped** | Tenant/project resource boundaries. | Instance creation, virtual port attachment, security group updates. |
+| System-Scoped | Infrastruktur fisik global | Manajemen hypervisor, binding network provider global, inspeksi log control-plane |
+| Domain-Scoped | Batas administratif tenant/organisasi | Lifecycle user, keanggotaan group, alokasi quota project |
+| Project-Scoped | Batas resource per project | Buat instance, attach virtual port, update security group |
 
----
+## 3. Service Catalog dan Service Tokens
 
-## 3. Service Catalog and Service Tokens
+Service Catalog berfungsi sebagai direktori endpoint REST API untuk semua komponen
 
-The Keystone **Service Catalog** functions as a dynamic directory of REST API endpoints:
-- **Public Endpoint:** Externally accessible by client tools and end users.
-- **Internal Endpoint:** Used for high-speed inter-service communication within the management subnet.
-- **Admin Endpoint:** Dedicated to privileged administrative workflows.
+- Public Endpoint: diakses oleh client eksternal dan end user
+- Internal Endpoint: jalur komunikasi antar-service di subnet management
+- Admin Endpoint: dipakai untuk workflow administratif khusus
 
-To prevent token expiry during long-running tasks, **Service Tokens** (`X-Service-Token`) are passed alongside user tokens (`X-Auth-Token`) when Nova communicates downstream with Glance or Neutron.
-
----
+Untuk mencegah token kedaluwarsa saat task berjalan lama, Service Token (X-Service-Token) dikirim berbarengan dengan user token (X-Auth-Token) ketika Nova berkomunikasi ke Glance atau Neutron
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/docs/overview/environment-setup/' | relative_url }}">&larr; Environment & Setup</a>

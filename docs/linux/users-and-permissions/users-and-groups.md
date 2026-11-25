@@ -6,87 +6,144 @@ permalink: /docs/linux/users-and-groups/
 
 # Working with Users and Groups
 
-Catatan belajar pribadi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC2
+Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC2
 
-## Admin Power Best Practices
+## Best Practices Admin Power
 
-Saat mengelola server, sebisa mungkin hindari login atau kerja langsung memakai akun root. Setiap admin atau operator sebaiknya punya akun unik masing-masing daripada berbagi satu akun bawaan seperti ubuntu atau ec2-user, dan setiap akun hanya diberi hak akses seperlunya saja. Kalau butuh menjalankan perintah administratif, lakukan lewat sudo supaya aktivitasnya tercatat dan bisa dibatasi di /etc/sudoers.d/
+- Hindari login atau bekerja langsung memakai akun root
+- Buat akun unik untuk tiap user, jangan share akun default seperti ubuntu atau ec2-user
+- Berikan authority seperlunya saja sesuai kebutuhan user (least privilege)
+- Jalankan privilege admin hanya lewat sudo supaya tercatat di log
 
-## Account and Group Files
+## Account Data dan Group Files
 
-Data akun user tersimpan di /etc/passwd dalam format yang bisa dibaca semua user, sedangkan hash password dan aturan masa berlaku password disimpan terpisah di /etc/shadow yang hanya bisa dibuka dengan akses root atau group shadow
+Cek daftar user di /etc/passwd (bisa dibaca semua user)
 
-    $ tail -n 3 /etc/passwd
-    systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
-    ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash
-    jane:x:1001:1001::/home/jane:/bin/bash
+```bash
+tail -n 3 /etc/passwd
+```
 
-    $ sudo tail -n 2 /etc/shadow
-    ubuntu:$y$j9T$abc123.../:19850:0:99999:7:::
-    jane:$y$j9T$xyz789.../:20052:0:99999:7:::
+```text
+systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
+ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash
+jane:x:1001:1001::/home/jane:/bin/bash
+```
 
-Daftar group dan anggotanya ada di /etc/group, sementara isi folder /etc/skel menjadi template file bawaan yang otomatis disalin ke home directory setiap kali kita membuat user baru
+Cek hash password di /etc/shadow (khusus root/shadow)
 
-    $ tail -n 3 /etc/group
-    ubuntu:x:1000:
-    jane:x:1001:
-    secret-group:x:1002:jane
+```bash
+sudo tail -n 2 /etc/shadow
+```
 
-    $ ls -a /etc/skel
-    .  ..  .bash_logout  .bashrc  .profile
+```text
+ubuntu:$y$j9T$abc123.../:19850:0:99999:7:::
+jane:$y$j9T$xyz789.../:20052:0:99999:7:::
+```
+
+Cek daftar group di /etc/group
+
+```bash
+tail -n 3 /etc/group
+```
+
+```text
+ubuntu:x:1000:
+jane:x:1001:
+secret-group:x:1002:jane
+```
+
+Cek file template default di /etc/skel
+
+```bash
+ls -a /etc/skel
+```
+
+```text
+.  ..  .bash_logout  .bashrc  .profile
+```
 
 ## Account Activity Data
 
-Untuk melihat UID, GID, dan daftar group milik seorang user pakai perintah id. Kalau mau mengecek siapa yang sedang login sekarang, apa yang lagi mereka kerjakan, dan riwayat login sebelumnya, pakai who, w, dan last
+Cek UID, GID, dan group milik user ubuntu
 
-    $ id ubuntu
-    uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),27(sudo)
+```bash
+id ubuntu
+```
 
-    $ who
-    ubuntu   pts/0        2026-11-25 20:10 (10.0.1.5)
+```text
+uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),27(sudo)
+```
 
-    $ w
-     20:22:14 up 4 days,  3:29,  1 user,  load average: 0.08, 0.10, 0.09
-    USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
-    ubuntu   pts/0    10.0.1.5         20:10    0.00s  0.04s  0.00s w
+Cek sesi login aktif dengan who dan w
 
-    $ last -n 3
-    ubuntu   pts/0        10.0.1.5         Wed Nov 25 20:10   still logged in
-    ubuntu   pts/0        10.0.1.5         Tue Nov 24 09:14 - 11:42  (02:28)
-    reboot   system boot  6.8.0-45-generic Fri Nov 21 16:53   still running
+```bash
+who
+```
 
-## Managing Accounts and Groups
+```text
+ubuntu   pts/0        2026-11-25 20:10 (10.0.1.5)
+```
 
-Contoh alur lengkap membuat user baru bernama jane sekalian home directory-nya, memasang password, membuat group secret-group, mengubah kepemilikan group folder /var/secret, lalu memasukkan jane ke dalam group tersebut. Saat memakai usermod, flag -a wajib disertakan bersama -G supaya group lama milik user tidak ikut terhapus
+```bash
+w
+```
 
-    $ sudo useradd -m jane
-    $ sudo passwd jane
-    New password:
-    Retype new password:
-    passwd: password updated successfully
+```text
+ 20:22:14 up 4 days,  3:29,  1 user,  load average: 0.08, 0.10, 0.09
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+ubuntu   pts/0    10.0.1.5         20:10    0.00s  0.04s  0.00s w
+```
 
-    $ sudo groupadd secret-group
-    $ sudo mkdir -p /var/secret
-    $ sudo chown :secret-group /var/secret
-    $ sudo usermod -a -G secret-group jane
+Cek riwayat login terakhir dengan last
 
-    $ id jane
-    uid=1001(jane) gid=1001(jane) groups=1001(jane),1002(secret-group)
+```bash
+last -n 3
+```
+
+```text
+ubuntu   pts/0        10.0.1.5         Wed Nov 25 20:10   still logged in
+ubuntu   pts/0        10.0.1.5         Tue Nov 24 09:14 - 11:42  (02:28)
+reboot   system boot  6.8.0-45-generic Fri Nov 21 16:53   still running
+```
+
+## Managing Accounts dan Groups
+
+Buat user jane dengan home directory, pasang password, buat group secret-group, ubah group ownership /var/secret, lalu masukkan jane ke group tersebut
+
+```bash
+sudo useradd -m jane
+sudo passwd jane
+sudo groupadd secret-group
+sudo mkdir -p /var/secret
+sudo chown :secret-group /var/secret
+sudo usermod -a -G secret-group jane
+id jane
+```
+
+```text
+uid=1001(jane) gid=1001(jane) groups=1001(jane),1002(secret-group)
+```
+
+- Flag -a pada usermod -a -G wajib dipakai supaya group lama milik user tidak terhapus
 
 ## SSH Access per User (AWS EC2 Best Practices)
 
-Di server production maupun AWS EC2, login SSH berbasis password sebaiknya dimatikan dan akses langsung ke root lewat SSH harus diblokir di /etc/ssh/sshd_config
+Matikan login password dan blokir root login di /etc/ssh/sshd_config
 
-    PasswordAuthentication no
-    PubkeyAuthentication yes
-    PermitRootLogin no
+```text
+PasswordAuthentication no
+PubkeyAuthentication yes
+PermitRootLogin no
+```
 
-Gunakan key modern seperti Ed25519 atau RSA minimal 2048-bit dan hindari algoritma lama seperti DSA. Public key masing-masing user ditaruh di /home/username/.ssh/authorized_keys dengan permission yang ketat supaya tidak bisa dibaca atau diubah sembarang user
+Gunakan key Ed25519 atau RSA 2048-bit+ dan jaga permission folder .ssh tiap user
 
-    $ chmod 700 ~/.ssh
-    $ chmod 600 ~/.ssh/authorized_keys
+```text
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+```
 
-Khusus di AWS, alternatif yang lebih aman daripada membuka port 22 dan mengelola static key adalah memakai AWS Systems Manager Session Manager yang mengandalkan IAM, atau EC2 Instance Connect yang memakai SSH key berumur pendek
+- Di AWS EC2, alternatif tanpa membuka port 22 dan mengelola static key adalah AWS Systems Manager Session Manager (via IAM) atau EC2 Instance Connect (short-lived SSH key)
 
 <div class="page-nav-box">
   <a href="{{ '/docs/linux/processes/' | relative_url }}" class="page-nav-btn">&larr; Managing Processes</a>

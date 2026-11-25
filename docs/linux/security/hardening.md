@@ -6,68 +6,105 @@ permalink: /docs/linux/hardening/
 
 # Hardening Your Server
 
-Catatan belajar pribadi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC2
+Catatan materi dari bootstrap-it.com/linux-admin dan dokumentasi keamanan AWS EC2
 
-## Patching and Package Hygiene
+## Patching Sistem
 
-Langkah paling dasar untuk memperkecil celah keamanan adalah rutin memperbarui paket sistem dan membuang atau mematikan service yang tidak dipakai. Di Debian atau Ubuntu kita jalankan apt update dan apt upgrade
+Update daftar paket dan upgrade sistem di Debian/Ubuntu
 
-    $ sudo apt update && sudo apt upgrade -y
-    Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
-    Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
-    Reading package lists... Done
-    0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+```bash
+sudo apt update && sudo apt upgrade -y
+```
 
-Sementara di keluarga RHEL, Amazon Linux, atau Fedora perintahnya memakai dnf update
+```text
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Reading package lists... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+```
 
-    $ sudo dnf update -y
-    Last metadata expiration check: 0:04:12 ago on Wed 25 Nov 2026 08:20:00 PM WIB.
-    Dependencies resolved.
-    Nothing to do.
-    Complete!
+Update paket di RHEL, Amazon Linux, atau Fedora
 
-## Port and Network Control
+```bash
+sudo dnf update -y
+```
 
-Supaya tahu port mana saja yang terbuka dan menerima koneksi dari lokal, jalankan TCP connect scan ke localhost memakai nmap
+```text
+Last metadata expiration check: 0:04:12 ago on Wed 25 Nov 2026 08:20:00 PM WIB.
+Dependencies resolved.
+Nothing to do.
+Complete!
+```
 
-    $ nmap -v -sT localhost
-    Starting Nmap 7.94 ( https://nmap.org ) at 2026-11-25 20:30 WIB
-    Initiating Connect Scan at 20:30
-    Scanning localhost (127.0.0.1) [1000 ports]
-    Discovered open port 22/tcp on 127.0.0.1
-    Discovered open port 80/tcp on 127.0.0.1
-    PORT   STATE SERVICE
-    22/tcp open  ssh
-    80/tcp open  http
+## Port dan Service Access Control
 
-Kita juga bisa mengetes dari sisi luar ke domain atau IP target untuk memastikan firewall atau Security Group memang hanya meloloskan port yang semestinya terbuka
+Scan port TCP yang terbuka secara lokal dengan nmap
 
-    $ nmap -v -sT bootstrap-it.com
-    Starting Nmap 7.94 ( https://nmap.org ) at 2026-11-25 20:31 WIB
-    PORT    STATE SERVICE
-    80/tcp  open  http
-    443/tcp open  https
+```bash
+nmap -v -sT localhost
+```
 
-Kalau ketemu service yang tidak dibutuhkan seperti apache2, langsung matikan dan cabut dari boot supaya port-nya tertutup
+```text
+Starting Nmap 7.94 ( https://nmap.org ) at 2026-11-25 20:30 WIB
+Initiating Connect Scan at 20:30
+Scanning localhost (127.0.0.1) [1000 ports]
+Discovered open port 22/tcp on 127.0.0.1
+Discovered open port 80/tcp on 127.0.0.1
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http
+```
 
-    $ sudo systemctl disable --now apache2
-    Removed "/etc/systemd/system/multi-user.target.wants/apache2.service".
+Scan port TCP dari luar ke host target
 
-Di AWS EC2, jangan pernah membuka port 22 ke 0.0.0.0/0 pada Security Group; batasi hanya untuk IP VPN, bastion, atau IP kantor tertentu, atau tutup port 22 sama sekali dan pakai SSM Session Manager
+```bash
+nmap -v -sT bootstrap-it.com
+```
 
-## Host-Level Hardening Extras
+```text
+Starting Nmap 7.94 ( https://nmap.org ) at 2026-11-25 20:31 WIB
+PORT    STATE SERVICE
+80/tcp  open  http
+443/tcp open  https
+```
 
-Pastikan sistem Mandatory Access Control bawaan distro tetap aktif, yaitu AppArmor di Ubuntu/Debian atau SELinux dalam mode enforcing di RHEL/Amazon Linux
+Matikan dan disable service yang tidak terpakai seperti apache2
 
-    $ sudo aa-status | head -n 4
-    apparmor module is loaded.
-    42 profiles are loaded.
-    40 profiles are in enforce mode.
+```bash
+sudo systemctl disable --now apache2
+```
 
-    $ getenforce
-    Enforcing
+```text
+Removed "/etc/systemd/system/multi-user.target.wants/apache2.service".
+```
 
-Sebagai tambahan di sisi host, partisi seperti /tmp, /var, dan /home bisa dipasang dengan opsi nodev, nosuid, dan noexec di /etc/fstab kalau workload-nya mendukung. Untuk pencatatan perubahan file sensitif atau eskalasi hak akses, aktifkan auditd dan sesekali jalankan Lynis (sudo lynis audit system) untuk mengecek kesiapan sistem terhadap standar baseline CIS
+- Di AWS EC2, jangan buka port 22 ke 0.0.0.0/0 pada Security Group; batasi ke IP VPN/bastion atau gunakan SSM Session Manager
+
+## Mandatory Access Control dan Audit
+
+Cek status AppArmor (Ubuntu/Debian)
+
+```bash
+sudo aa-status | head -n 4
+```
+
+```text
+apparmor module is loaded.
+42 profiles are loaded.
+40 profiles are in enforce mode.
+```
+
+Cek status SELinux (RHEL/Amazon Linux)
+
+```bash
+getenforce
+```
+
+```text
+Enforcing
+```
+
+- Tambahan hardening host: mount /tmp, /var, /home dengan nodev, nosuid, noexec di /etc/fstab jika workload mendukung, aktifkan auditd, dan jalankan sudo lynis audit system untuk baseline check
 
 <div class="page-nav-box">
   <a href="{{ '/docs/linux/permissions-and-links/' | relative_url }}" class="page-nav-btn">&larr; Permissions &amp; Symlinks</a>
