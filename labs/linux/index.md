@@ -6,14 +6,15 @@ permalink: /labs/linux/
 
 # Linux Lab Scripts
 
-Kumpulan script latihan praktis untuk materi monitoring, manajemen user/group, permission, dan server hardening di Linux
+Script bash latihan untuk monitoring, manajemen user/group, permission, dan hardening
 
 ## health-check.sh
 
-Script ini dipakai untuk mengambil ringkasan cepat kondisi server dalam satu kali jalan mulai dari sisa RAM, kapasitas partisi ext4, lima proses paling boros memory, daftar port yang listening, sampai error terbaru di systemd journal
+Ambil snapshot kondisi server dalam satu kali jalan (memory, disk ext4, top 5 proses memory, listening ports, dan error journal 10 menit terakhir)
 
-    $ chmod +x labs/linux/health-check.sh
-    $ sudo ./labs/linux/health-check.sh
+    chmod +x labs/linux/health-check.sh
+    sudo ./labs/linux/health-check.sh
+
     === Memory ===
                    total        used        free      shared  buff/cache   available
     Mem:           3.8Gi       984Mi       1.1Gi        12Mi       1.7Gi       2.6Gi
@@ -34,20 +35,22 @@ Script ini dipakai untuk mengambil ringkasan cepat kondisi server dalam satu kal
 
 ## user-group-lab.sh
 
-Script ini mengotomatiskan latihan pembuatan group secret-group, pembuatan user jane dengan home directory, penambahan user ke group pakai usermod -a -G, pengaturan hak akses folder /var/secret menjadi 750, dan pembuatan symlink kalau script sumbernya sudah tersedia
+Otomatisasi latihan pembuatan group secret-group, user jane, usermod -a -G, chmod 750 /var/secret, dan symlink myscript.sh
 
-    $ chmod +x labs/linux/user-group-lab.sh
-    $ sudo ./labs/linux/user-group-lab.sh
+    chmod +x labs/linux/user-group-lab.sh
+    sudo ./labs/linux/user-group-lab.sh
+
     Setup complete:
     uid=1001(jane) gid=1001(jane) groups=1001(jane),1002(secret-group)
     drwxr-x--- 2 root secret-group 4096 Nov 25 20:48 /var/secret
 
 ## hardening-audit.sh
 
-Script read-only untuk mengecek service apa saja yang aktif saat boot, port TCP lokal yang terbuka lewat nmap (atau fallback ke ss kalau nmap belum terpasang), dan status AppArmor atau SELinux di sistem
+Pengecekan read-only untuk service yang aktif saat boot, port TCP lokal (nmap atau fallback ss), dan status AppArmor/SELinux
 
-    $ chmod +x labs/linux/hardening-audit.sh
-    $ sudo ./labs/linux/hardening-audit.sh
+    chmod +x labs/linux/hardening-audit.sh
+    sudo ./labs/linux/hardening-audit.sh
+
     === Enabled Boot Services ===
     UNIT FILE                              STATE           PRESET
     cron.service                           enabled         enabled
