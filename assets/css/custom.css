@@ -18,6 +18,16 @@ header::-webkit-scrollbar-thumb {
   border-radius: 2px;
 }
 
+footer {
+  position: static !important;
+  width: auto !important;
+  float: none !important;
+  margin: 18px 0 4px 0 !important;
+  padding-top: 12px !important;
+  border-top: 1px solid #2e2e2e !important;
+  color: #777777 !important;
+}
+
 /* Adjust wrapper and section to match header width */
 .wrapper {
   width: 980px !important;
@@ -226,6 +236,21 @@ p.header {
 /* Code Block Copy Button */
 .code-block-wrapper {
   position: relative !important;
+}
+
+/* Monochrome Paper Code & Output Blocks */
+div.language-bash pre {
+  background: #ebe7dc !important;
+  color: #1f1f1f !important;
+  border: 1px solid #d2cbb8 !important;
+  border-radius: 3px !important;
+}
+
+div.language-text pre {
+  background: #f7f5ef !important;
+  color: #2b2b2b !important;
+  border: 1px dashed #ccc6b8 !important;
+  border-radius: 3px !important;
 }
 
 div.language-bash pre {
