@@ -161,3 +161,50 @@ jobs:
       - name: Run GitHub Wiki Sync
         run: |
           python3 scripts/sync-wiki.py
+
+  notify:
+    name: notify email
+    needs: [lint, build, deploy, release, sync-wiki]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check SMTP Secrets
+        id: check_smtp
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASS: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_TO: ${{ secrets.NOTIFY_EMAIL }}
+        run: |
+          if [ -n "$MAIL_USER" ] && [ -n "$MAIL_PASS" ] && [ -n "$MAIL_TO" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping email notification: MAIL_USERNAME / MAIL_PASSWORD secret not set yet."
+          fi
+
+      - name: Send Pipeline Email
+        if: steps.check_smtp.outputs.ready == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "[${{ github.repository }}] ci on ${{ github.ref_name }}: lint=${{ needs.lint.result }}, build=${{ needs.build.result }}, deploy=${{ needs.deploy.result }}"
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: "GitHub Actions <${{ secrets.MAIL_USERNAME }}>"
+          body: |
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Event: ${{ github.event_name }}
+            Commit: ${{ github.sha }}
+
+            Jobs:
+            - lint & checks: ${{ needs.lint.result }}
+            - build site: ${{ needs.build.result }}
+            - deploy pages: ${{ needs.deploy.result }}
+            - release: ${{ needs.release.result }}
+            - sync wiki: ${{ needs.sync-wiki.result }}
+
+            Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
